@@ -1,0 +1,172 @@
+<!DOCTYPE <!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Three.js App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" media="screen" href="main.css" />
+</head>
+<body>
+    <canvas id="myCanvas"></canvas>
+
+    <div>
+        <input id="geometryhandlerinput">
+        <button type="button" id="geometryhandlerbutton">Enter Geometry</button>
+    </div>
+
+    <script src="three.js"></script>
+    <script>
+        // Text Geometry - 6:53
+
+        // Drawing 2D shapes, extrude; bezier, moveTo, etc. - 8:22
+
+        // Canvas - the actual thing that makes the images and renders the objects
+        var renderer = new THREE.WebGLRenderer({canvas: document.getElementById('myCanvas'), antialias : true});
+        renderer.setClearColor(0x00ff00);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        // document.body.appendChild(renderer.domElement);
+
+        // Camera - viewpoint in the scene; from where the user will view the scene and object(s)
+        var camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.1, 3000);
+
+        // Scene - contains all of the objects (including camera) involved
+        var scene = new THREE.Scene();
+
+        // Lights
+
+        // Ambient - covers entire scene, (color, intensity);
+        var light = new THREE.AmbientLight(0xffffff, 0.5);
+        scene.add(light);
+
+        // Point - works from specific point of scene, (color, intensity);
+        var light1 = new THREE.PointLight(0xffffff, 0.5);
+        scene.add(light1);
+
+        var geometry;
+        var geometryHandlerButton = document.querySelector("#geometryhandlerbutton");
+        var geometryHandler = function() {
+            geometryInput = document.querySelector('#geometryhandlerinput').value;
+            
+            if(geometryInput === '1') {
+                // PlaneGeometry
+                geometry = new THREE.PlaneGeometry(100, 100, 100);
+            } else if(geometryInput === '2') {
+                // CubeGeometry === BoxGeometry
+                // Geometry
+                geometry = new THREE.Geometry();
+                geometry.vertices.push(
+                new THREE.Vector3(-10, 10, 0),
+                new THREE.Vector3(-10, -10, 0),
+                new THREE.Vector3(10, -10, 0),
+                );
+                geometry.faces.push( new THREE.Face3(0, 1, 2));
+            } else if(geometryInput === '3') {
+                // BufferGeometry
+                geometry = new THREE.BufferGeometry();
+                // var bufferVertices = new Float32Array([
+                // -10.0, -10.0, 0.0,
+                // 10.0, -10.0, 0.0,
+                // 10.0, 10.0, 0.0
+                // ]);
+            } else if(geometryInput === '4') {
+                // BoxGeometry
+                geometry = new THREE.BoxGeometry(100, 100, 100);
+            } else if(geometryInput === '5') {
+                // SphereGeometry
+                geometry = new THREE.SphereGeometry(50, 10, 10);
+            } else if(geometryInput === '6') {
+                // CircleGeometry/CircleBufferGeometry
+                geometry = new THREE.CircleGeometry(50, 50, 50);
+            } else if(geometryInput === '7') {
+                // ConeGeometry
+                gemoetry = new THREE.ConeGeometry(100, 100, 100);
+            } else if(geometryInput === '8') {
+                // CylinderGeometry
+                geometry = new THREE.CylinderGeometry(100, 100, 100, 100, false);
+            } else if(geometryInput === '9') {
+                // PolyhedronGeometry
+                var vertices = [
+                    'coords', 'coords', 'etc.'
+                ];
+
+                var faces = [
+                    '#,#,#',  '#,#,#',
+                    '#,#,#',  '#,#,#',
+                    'etc.'
+                ];
+
+                geometry = new THREE.PolyhedronGeometry(vertices, faces, 100, 2);
+            } else if(geometryInput === '10') {
+                // DodecahedronGeometry
+                geometry = new THREE.DodecahedronGeometry(100, 0);
+            } else if(geometryInput === '11') {
+                // IcosahedronGeometry
+                geometry = new THREE.IcosahedronGeometry(100, 0);
+            } else if(geometryInput === '12') {
+                geometry = new THREE.OctohedronGeometry(100, 50);
+            } else if(geometryInput === '13') {
+                geometry = new THREE.RingGeometry(50, 100, 32);
+            } else if(geometryInput === '14') {
+                geometry = new THREE.TetrahedronGeometry(10, 50);
+            } else if(geometryInput === '15') {
+                geometry = new THREE.TorusGeometry(100, 30, 16, 100);
+            } else if(geometryInput === '16') {
+                geometry = new THREE.TorusKnotGeometry(100, 30, 100, 100);
+            } else if(geometryInput === '17') {
+                var points = [];
+                for (var i = 0; i < 10; i += 1) {
+                    points.push( new THREE.Vector2(5 + Math.sin(i * 0) * 40, i * 10));
+                }
+                geometry = new THREE.LatheGeometry(points);
+            } else if(geometryInput === '18') {
+                // 10:00
+                var paraFunc = function (u, v) {
+                    var x = -100 + 200 * u;
+                    var y = 0;
+                    var z = (Math.sin(u * Math.PI) + Math.sin(v * Math.PI)) * -60;
+
+                    return new THREE.Vector3(x, y, z);
+                }
+                geometry = new THREE.ParametricGeometry(paraFunc, 10, 10);
+            } else if(geometryInput === '19') {
+                var curve = new THREE.SplineCurve3([
+                    new THREE.Vector3( -10, 0, 100 ),
+                    new THREE.Vector3( -5, 5, 5 ),
+                    new THREE.Vector3( 0, 0, 0 ),
+                    new THREE.Vector3( 5, -50, 5 ),
+                    new THREE.Vector3( 100, 0, 10 )
+                ]);
+                geometry = new THREE.TubeGeometry(curve, 50, 20, 80, false);
+            }
+            console.log(geometryInput);
+            console.log(geometry);
+
+            // Material determines what the object will be made out of, so how it will appear in the rendering
+            // Lambert Material responds to light
+            var material = new THREE.MeshLambertMaterial({color : 0xF3FFE2});
+
+            // Mesh === Geometry + Material
+            var mesh = new THREE.Mesh(geometry, material);
+            // z pos must be set away from the camera, so there is enough distance to render
+            mesh.position.set(0, 0, -1000);
+
+            scene.add(mesh);
+
+            // requrestAnimationFrame calls itself and render() repeatedly
+            requestAnimationFrame(render);
+            // render function changes position of mesh when called
+            function render() {
+            mesh.rotation.x += 0.01;
+            mesh.rotation.y += 0.03;
+            renderer.render(scene, camera);
+            requestAnimationFrame(render);
+        }
+
+        renderer.render(scene, camera);
+        }
+        geometryHandlerButton.addEventListener('click', geometryHandler);
+    </script>
+</body>
+</html>

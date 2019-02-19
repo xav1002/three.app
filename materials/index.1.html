@@ -1,0 +1,122 @@
+<!DOCTYPE <!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Three.js App - Materials</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" media="screen" href="main.css" />
+</head>
+<body>
+    <canvas id="myCanvas"></canvas>
+
+    <div>
+        <input id="geometryhandlerinput">
+        <button type="button" id="geometryhandlerbutton">Enter Geometry</button>
+    </div>
+
+    <script src="three.js"></script>
+    <script>
+        // Text Geometry - 6:53
+
+        // Drawing 2D shapes, extrude; bezier, moveTo, etc. - 8:22
+        var renderer = new THREE.WebGLRenderer({canvas: document.getElementById('myCanvas'), antialias : true});
+        renderer.setClearColor(0x00ff00);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        // document.body.appendChild(renderer.domElement);
+
+        // Camera
+        var camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.1, 3000);
+
+        // Scene
+        var scene = new THREE.Scene();
+
+        // Lights
+        var light = new THREE.AmbientLight(0xffffff, 0.5);
+        scene.add(light);
+
+        var light1 = new THREE.PointLight(0xffffff, 0.5);
+        scene.add(light1);
+
+        // import { Scene, CanvasRenderer } from "./three";
+
+        var material = new THREE.MeshBasicMaterial({
+            color: 0xff0000,
+            transparent: true,
+            opacity: 1,
+            // map: new THREE.TextureLoader().load(url)
+            wireframe: true,
+            wireframeLinewidth: 5,
+            wireframeLinejoin: 'round',
+            wireframeLinecap: 'round'
+        });
+
+        // MeshNormalMaterial();
+        // MeshLambertMaterial();
+            // emissive === emitts glow(emmisiveIntensity)
+            // side - choose which side you can see: back, front, doubleside, etc.
+        // MeshPhongMaterial();
+            // shininess
+            // map - texture
+            // normalMap - abraisions
+        // StandardMaterial - Phong/Lambert combo
+            // roughness, metalness
+        // MeshDepthMaterial - grayscale dependent on distance
+
+        var geometry = new THREE.BoxGeometry(100, 100, 100);
+        var mesh = new THREE.Mesh(geometry, material);
+        mesh.position.z = -1000;
+        mesh.position.x = -100;
+        scene.add(mesh);
+        
+        var geometry2 = new THREE.SphereGeometry(50, 20, 20);
+        var mesh2 = new THREE.Mesh(geometry2, material);
+        mesh2.position.z = -1000;
+        mesh2.position.x = 100;
+        scene.add(mesh2);
+        
+        var geometry3 = new THREE.PlaneGeometry(10000, 10000, 100, 100);
+        var mesh3 = new THREE.Mesh(geometry3, material);
+        mesh3.rotation.x = -90 * Math.PI / 180;
+        mesh3.position.y = -100;
+        scene.add(mesh3);
+
+        render();
+        
+        function render() {
+            mesh.rotation.x += 0.01;
+            mesh.rotation.y += 0.01;
+            mesh2.rotation.x += 0.01;
+            mesh2.rotation.y += 0.01;
+
+            function move(e) {
+                if(e.key === 'w') {
+                camera.position.z -= .1;
+                } else if(e.key === 's') {
+                    camera.position.z += .1;
+                } else if(e.key === 'd') {
+                    camera.position.x += .1;
+                } else if(e.key === 'a') {
+                    camera.position.x -= .1;
+                } else if(e.key === 'r') {
+                    mesh2.position.x -= .1;
+                } else if(e.key === 't') {
+                    mesh2.position.x += .1;
+                }
+            }
+            window.addEventListener('keydown', move);
+
+            function rotateView(e) {
+                camera.rotation.x = (-e.pageY - (window.innerWidth / 2)) / 100;
+                camera.rotation.y = (-e.pageX - (window.innerHeight / 2)) / 100;
+                console.log(e);
+            }
+            window.addEventListener('mousemove', rotateView);
+
+            renderer.render(scene, camera);
+            requestAnimationFrame(render);
+        }
+        </script>
+</body>
+</html>
