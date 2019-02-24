@@ -1,4 +1,4 @@
-<!DOCTYPE <!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8" />
@@ -8,7 +8,16 @@
     <link rel="stylesheet" type="text/css" media="screen" href="main.css" />
 </head>
 <body>
+
     <canvas id="myCanvas"></canvas>
+
+    <div id="blocker">
+        <div id="instructions">
+            <span style="font-size:40px">Click</span>
+
+            (W, A, S, D = Move, Space = Up, Shift = Down, Mouse = Look Around)
+        </div>
+    </div>
 
     <div>
         <input id="geometryhandlerinput">
@@ -16,27 +25,55 @@
     </div>
 
     <script src="three.js"></script>
+    <script src="PointerLockControls.js"></script>
     <script src="FirstPersonControls.js"></script>
     <script>
-        var camera, controls, scene, mesh, mesh2, mesh3, renderer, geometry, geometry2, geometry3, material
+        // const canvas = document.getElementById('myCanvas');
+        // const drawApi = canvas.getContext('2d');
+
+        // drawApi.lineWidth = 5;
+        // drawApi.strokeStyle = "000000";
+        // drawApi.moveTo(window.innerWidth / 2, window.innerHeight / 2);
+        // drawApi.lineTo(window.innerWidth / 2, window.innerHeight / 2 + 30);
+        // drawApi.moveTo(window.innerWidth / 2 - 15, window.innerHeight / 2 + 15);
+        // drawApi.lineTo(window.innerWidth / 2 + 15, window.innerHeight / 2 + 15);
+        // drawApi.stroke();
+
+        var camera, controls, scene, mesh, mesh2, mesh3, renderer, geometry, geometry2, geometry3, material, raycaster;
+
+        var moveForward = false;
+        var moveBackward = false;
+        var moveLeft = false;
+        var moveRight = false;
+        var moveUp = false;
+        var moveDown = false;
+        var canJump = false;
+
+        var prevTime = performance.now();
+        var velocity = new THREE.Vector3();
+        var direction = new THREE.Vector3();
+        var vertex = new THREE.Vector3();
+        var color = new THREE.Color();
 
         init();
         animate();
 
         function init() {
-            // Text Geometry - 6:53
-            console.log("works");
-        // Scene
-        scene = new THREE.Scene();
+        // Text Geometry - 6:53
+        console.log("works");
 
-        // Camera
         camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.1, 3000);
 
         // Drawing 2D shapes, extrude; bezier, moveTo, etc. - 8:22
-        renderer = new THREE.WebGLRenderer({canvas: document.getElementById('myCanvas'), antialias : true});
-        renderer.setClearColor(0x00ff00);
-        renderer.setPixelRatio(window.devicePixelRatio);
-        renderer.setSize(window.innerWidth, window.innerHeight);
+
+        scene = new THREE.Scene();
+
+        // Lights
+        var light = new THREE.AmbientLight(0xffffff, 0.5);
+        scene.add(light);
+
+        var light1 = new THREE.PointLight(0xffffff, 0.5);
+        scene.add(light1);
 
         geometry = new THREE.BoxGeometry(100, 100, 100);
         geometry2 = new THREE.SphereGeometry(50, 20, 20);
@@ -54,22 +91,61 @@
         });
 
         mesh = new THREE.Mesh(geometry, material);
+        mesh.position.z = -1000;
+        mesh.position.x = -100;
+
         mesh2 = new THREE.Mesh(geometry2, material);
+        mesh2.position.z = -1000;
+        mesh2.position.x = 100;
+
         mesh3 = new THREE.Mesh(geometry3, material);
+        mesh3.rotation.x = -90 * Math.PI / 180;
+        mesh3.position.y = -100;
+
+        scene.add(mesh);
+        scene.add(mesh2);
+        scene.add(mesh3);
+
+        controls = new THREE.PointerLockControls( camera );
+
+        var blocker = document.getElementById('blocker');
+        var instructions = document.getElementById('instructions');
+
+				instructions.addEventListener( 'click', function () {
+                    controls.lock();
+                    console.log("works");
+				}, false );
+				controls.addEventListener( 'lock', function () {
+					instructions.style.display = 'none';
+					blocker.style.display = 'none';
+				} );
+				controls.addEventListener( 'unlock', function () {
+					blocker.style.display = 'block';
+					instructions.style.display = '';
+				} )
+
+        // window.addEventListener( 'click', function () {
+        //     controls.lock();
+        // }, false );
+
+        // controls.addEventListener( 'lock', function () {
+        //     console.log('controls unlocked');
+        // });
+
+        scene.add(controls.getObject());
+
+        raycaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 0, - 1, 0 ), 0, 10 );
+
+        renderer = new THREE.WebGLRenderer({canvas: document.getElementById('myCanvas'), antialias : true});
+        renderer.setClearColor(0x00ff00);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(window.innerWidth, window.innerHeight);
+
+}
+
         // document.body.appendChild(renderer.domElement);
 
-        
-
-        // Lights
-        var light = new THREE.AmbientLight(0xffffff, 0.5);
-        scene.add(light);
-
-        var light1 = new THREE.PointLight(0xffffff, 0.5);
-        scene.add(light1);
-
         // import { Scene, CanvasRenderer } from "./three";
-
-        
 
         // MeshNormalMaterial();
         // MeshLambertMaterial();
@@ -83,48 +159,152 @@
             // roughness, metalness
         // MeshDepthMaterial - grayscale dependent on distance
 
-        
-        mesh.position.z = -1000;
-        mesh.position.x = -100;
-        scene.add(mesh);
-        
-        
-        
-        mesh2.position.z = -1000;
-        mesh2.position.x = 100;
-        scene.add(mesh2);
-        
-        
-        
-        mesh3.rotation.x = -90 * Math.PI / 180;
-        mesh3.position.y = -100;
-        scene.add(mesh3);
+        // controls = new THREE.FirstPersonControls( camera );
+        // controls.movementSpeed = 1000;
+		// controls.lookSpeed = 0.125;
+		// controls.lookVertical = true;
+		// controls.constrainVertical = true;
+	    // controls.verticalMin = 1.1;
+        // controls.verticalMax = 2.2;
 
-            
+        var onKeyDown = function ( e ) {
 
-        controls = new THREE.FirstPersonControls( camera );
-        controls.movementSpeed = 1000;
-		controls.lookSpeed = 0.125;
-		controls.lookVertical = true;
-		controls.constrainVertical = true;
-	    controls.verticalMin = 1.1;
-		controls.verticalMax = 2.2;
-        
+switch ( e.keyCode ) {
+
+    case 38: // up
+    case 87: // w
+            moveForward = true;
+            console.log(moveForward);
+            break;
+
+    case 37: // left
+    case 65: // a
+            moveLeft = true;
+            break;
+
+    case 40: // down
+    case 83: // d
+            moveBackward = true;
+            break;
+
+    case 39: // right
+    case 68: // d
+            moveRight = true;
+            break;
+
+    case 32: // up
+            moveUp = true;
+            break;
+
+    case 16: // down
+            moveDown = true;
+            break;
+}
+};
+
+var onKeyUp = function ( e ) {
+
+switch ( e.keyCode ) {
+
+    case 38: // up
+    case 87: // w
+            moveForward = false;
+            break;
+
+    case 37: // left
+    case 65: // a
+            moveLeft = false;
+            break;
+
+    case 40: // down
+    case 83: // d
+            moveBackward = false;
+            break;
+
+    case 39: // right
+    case 68: // d
+            moveRight = false;
+            break;
+
+    case 32: // up
+            moveUp = false;
+            break;
+
+    case 16: // down
+            moveDown = false;
+            break;
+}
+};
+document.addEventListener( 'keydown', onKeyDown, false);
+document.addEventListener( 'keyup', onKeyUp, false);
+
+        var isMouseDown;
+        function mouseTrackerDown () {
+            isMouseDown = true;
+            return;
         }
+        function mouseTrackerUp () {
+            isMouseDown = false;
+            return;
+        }
+        document.addEventListener('mousedown', mouseTrackerDown);
+        document.addEventListener('mouseup', mouseTrackerUp);
+
+        function rotateView(e) {
+            console.log(e);
+            controls.getObject().rotation.y = e.x;
+        }
+        window.addEventListener('mousedown', rotateView);
 
         function animate() {
-            console.log('works');
-            requestAnimationFrame( animate );
+                    requestAnimationFrame( animate );
+                    raycaster.ray.origin.copy( controls.getObject().position );
+					raycaster.ray.origin.y -= 10;
+					// var intersections = raycaster.intersectObjects( objects );
+                    // var onObject = intersections.length > 0;
+					var time = performance.now();
+					var delta = ( time - prevTime ) / 1000;
+					velocity.x -= velocity.x * 7.5 * delta;
+                    velocity.z -= velocity.z * 7.5 * delta;
+                    velocity.y -= velocity.y * 7.5 * delta;
+					// velocity.y -= 9.8 * 100.0 * delta; // 100.0 = mass
+					direction.z = Number( moveForward ) - Number( moveBackward );
+                    direction.x = Number( moveLeft ) - Number( moveRight );
+                    direction.y = Number( moveUp ) - Number( moveDown );
+					direction.normalize(); // this ensures consistent movements in all directions
+					if ( moveForward || moveBackward ) {
+                        console.log("works");
+                        velocity.z -= direction.z * 4000.0 * delta
+                    };
+					if ( moveLeft || moveRight ) {
+                        velocity.x -= direction.x * 4000.0 * delta
+                    };
+                    if (moveUp || moveDown) {
+                        velocity.y += direction.y * 4000.0 * delta
+                    }
+					// if ( onObject === true ) {
+					// 	velocity.y = Math.max( 0, velocity.y );
+					// 	canJump = true;
+					// }
+					controls.getObject().translateX( velocity.x * delta );
+					controls.getObject().translateY( velocity.y * delta );
+					controls.getObject().translateZ( velocity.z * delta );
+					
+					// velocity.y = 0;
+					// controls.getObject().position.y = 10;
+					// canJump = true;
+					
+                    prevTime = time;
 
-            render();
+                    mesh.rotation.x += 0.01;
+                    mesh.rotation.y += 0.01;
+                    mesh2.rotation.x += 0.01;
+                    mesh2.rotation.y += 0.01;
+				renderer.render( scene, camera );
         }
 
-        function render() {
-            mesh.rotation.x += 0.01;
-            mesh.rotation.y += 0.01;
-            mesh2.rotation.x += 0.01;
-            mesh2.rotation.y += 0.01;
-            console.log('works');
+        // function render() {
+        //     console.log('works');
             // function move(e) {
             //     if(e.key === 'w') {
             //     camera.position.z -= .1;
@@ -143,17 +323,8 @@
             // }
             // window.addEventListener('keydown', move);
 
-            
-
-            // function rotateView(e) {
-            //     camera.rotation.x = (-e.pageY - (window.innerWidth / 2)) / 100;
-            //     camera.rotation.y = (-e.pageX - (window.innerHeight / 2)) / 100;
-            //     console.log(e);
-            // }
-            // window.addEventListener('mousemove', rotateView);
-
-            renderer.render(scene, camera);
-        }
+            // renderer.render(scene, camera);
+        // }
         </script>
 </body>
 </html>
