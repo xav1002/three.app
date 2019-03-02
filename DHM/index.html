@@ -46,6 +46,7 @@
     <script src="../FirstPersonControls.js"></script>
     <script src="../PointerLockControls.js"></script>
     <script src="..\three.js-master\examples\js\libs\stats.min.js"></script>
+    <script src="..\threex.domevents\threex.domevents.js"></script>
 
     <script>
         // Change Speeds
@@ -238,11 +239,19 @@
 		        renderer.setPixelRatio( window.devicePixelRatio );
 		        renderer.setSize( window.innerWidth, window.innerHeight );
                 document.body.appendChild( renderer.domElement );
-        }
 
-        mesh.addEventListener('mouseenter', function(e) {
+                const domEvents = new THREEx.DomEvents(camera, renderer.domElement);
+
+                domEvents.addEventListener(mesh, 'click', function (e) {
+                        console.log('works');
+                        material.wireframe = true;
+                    });
+
+                domEvents.addEventListener(mesh, 'mouseover', function(e) {
                 console.log(e);
+                material.wireframe = false;
             });
+        }
 
         var onKeyDown = function ( e ) {
 
