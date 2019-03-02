@@ -1,32 +1,58 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!-- <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"> -->
     <title>Double-Helix Model</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" media="screen" href="main1.css">
 </head>
 <body>
+        <!-- <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script> -->
+
+    <div id="optionsdiv">
+            <div class="list-group">
+                    <button type="button" id="settingsbutton" class="list-group-item list-group-item-action">Settings</button>
+                    <button type="button" id="cursortogglebutton" class="list-group-item list-group-item-action">Cursor: On</button>
+                    <span>
+                        <input type="range" id="renderdistancevalueinput">
+                        <div>Change Render Distance</div>
+                    </span>
+                    <span>
+                        <input type="range" id="speedvalueinput">
+                        <div>Change Movement Speed</div>
+                    </span>
+                    <button type="button" id="optionsexitbutton" class="list-group-item list-group-item-action">Exit</button>
+                  </div>
+    </div>
     <div id="blocker">
 
         <div id="instructions">
             <span style="font-size:40px">Click</span>
             <br />
-            (W, A, S, D = Move, SPACE = Move Up, SHIFT = Move Down, MOUSE = Look around)
+            (W, A, S, D = Move, SPACE = Move Up, SHIFT = Move Down, MOUSE = Look around, E = Options, ESC = Controls)
         </div>
 
     </div>
 
-
+        <div class="cursor-vertical"></div>
+        <div class="cursor-horizontal"></div>
 
     <script src="../three.js"></script>
     <script src="../FirstPersonControls.js"></script>
     <script src="../PointerLockControls.js"></script>
+    <script src="..\three.js-master\examples\js\libs\stats.min.js"></script>
 
     <script>
+        // Change Speeds
+        // Options Tray - unlock controls
+        // prevent(); ??
 
-        var camera, controls, scene, renderer, material;
+        var camera, controls, scene, renderer, material, renderDistance, container, stats, raycaster;
 
         var moveForward = false;
         var moveBackward = false;
@@ -41,11 +67,34 @@
         var direction = new THREE.Vector3();
         var vertex = new THREE.Vector3();
 
+        var mouse = new THREE.Vector2(), INTERSECTED;
+
         init();
         animate();
 
         function init () {
-            camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.1, 3000);
+
+            // Work-in-progress statistical analysis div
+
+            container = document.createElement('div');
+            document.body.appendChild(container);
+
+            stats = new Stats();
+            container.appendChild(stats.dom);
+
+            camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.1, 35000);
+
+            // Work-in-progress render distance change
+
+            // var renderDistanceValueInput = document.querySelector("#renderdistancevalueinput");
+            // renderDistance = renderDistanceValueInput.value * 1000 + 3000
+            // console.log(renderDistanceValueInput.value);
+            // var setRenderDistance = function () {
+            //     renderDistance = renderDistanceValueInput.value * 1000 + 3000;
+            //     camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.1, renderDistance);
+            //     console.log(renderDistance);
+            // }
+            // renderDistanceValueInput.addEventListener('change', setRenderDistance);
 
             scene = new THREE.Scene();
 
@@ -55,14 +104,14 @@
             var light1 = new THREE.PointLight(0xffffff, 0.5);
             scene.add(light1);
 
-            geometry = new THREE.BoxGeometry(10, 10, 10);
+            geometry = new THREE.BoxGeometry(1000, 1000, 1000);
 
             material = new THREE.MeshBasicMaterial({
             color: 0xff0000,
             transparent: true,
             opacity: 1,
             // map: new THREE.TextureLoader().load(url)
-            wireframe: true,
+            wireframe: false,
             wireframeLinewidth: 5,
             wireframeLinejoin: 'round',
             wireframeLinecap: 'round'
@@ -72,138 +121,260 @@
             mesh.position.z = -1000;
             mesh.position.x = 0;
 
+            scene.add(mesh);
+
         controls = new THREE.PointerLockControls( camera );
 
+        var options = document.querySelector('#optionsdiv');
+        options.style.display = 'none';
+        var optionsExitButton = document.querySelector('#optionsexitbutton');
+        var cursorToggleButton = document.querySelector('#cursortogglebutton');
+        console.log(cursorToggleButton);
+        var cursor = document.querySelector('#cursor');
+        var cursorVert = document.querySelector('.cursor-vertical');
+        cursorVert.style.top = Number((window.innerHeight / 2) - 10) + 'px';
+        cursorVert.style.left = Number((window.innerWidth /2) - 3/2) + 'px';
+        var cursorHorizon = document.querySelector('.cursor-horizontal');
+        cursorHorizon.style.top = Number((window.innerHeight / 2) - 3/2) + 'px';
+        cursorHorizon.style.left = Number((window.innerWidth / 2) - 10) + 'px';
+        console.log(cursorVert, cursorHorizon);
+        var renderDistanceToggle = document.querySelector('#renderdistancetoggle');
+
+        var body = document.querySelector('body');
         var blocker = document.getElementById('blocker');
         var instructions = document.getElementById('instructions');
 
-				instructions.addEventListener( 'click', function () {
+				blocker.addEventListener( 'click', function () {
                     controls.lock();
                     console.log("works");
 				}, false );
 				controls.addEventListener( 'lock', function () {
 					instructions.style.display = 'none';
 					blocker.style.display = 'none';
-				} );
-				controls.addEventListener( 'unlock', function () {
-					blocker.style.display = 'block';
-					instructions.style.display = '';
                 } );
+
+                // controls.addEventListener( 'unlock', function () {
+				// 	blocker.style.display = 'block';
+				// 	instructions.style.display = '';
+                // } );
+
+                window.addEventListener('keydown', function (e) {
+                    e.preventDefault();
+                    if (e.keyCode === 69 && blocker.style.display === 'none') {
+                        console.log("works");
+                        options.style.display = 'block';
+                        controls.unlock();
+                    } else if (e.keyCode === 27 && options.style.display !== 'block') {
+                        instructions.style.display = '';
+                        blocker.style.display = 'block';
+                    }
+                });
+
+                optionsExitButton.addEventListener('click', function () {
+                    options.style.display = 'none';
+                    controls.lock();
+                });
+
+                cursorVert.style.display = 'block';
+
+                cursorToggleButton.addEventListener('click', function () {
+                    if (cursorVert.style.display === 'block') {
+                    cursorVert.style.display = 'none';
+                    cursorHorizon.style.display = 'none';
+                    cursorToggleButton.innerText = 'Cursor: Off';
+                    console.log("works");
+                    } else if (cursorVert.style.display === 'none') {
+                        cursorVert.style.display = 'block';
+                        cursorHorizon.style.display = 'block';
+                        cursorToggleButton.innerText = 'Cursor: On';
+                        console.log("works");
+                    }
+                });
+
+				//     document.addEventListener( 'keydown', function (e) {
+                //     // console.log(e.keyCode);
+                //     e.preventDefault();
+                //     if (e.keyCode === 27) {
+                //         console.log("works");
+				// 	    blocker.style.display = 'block';
+                //         instructions.style.display = '';
+                //         // controls.unlock();
+                //     }
+                // } );
+
+                // var eKeyWasPressed = false;
+                // document.addEventListener('keydown', function (e) {
+                //     e.preventDefault();
+                //     if (e.keyCode === 69) {
+                //         eKeyWasPressed = true;
+                //     }
+                //     console.log(eKeyWasPressed);
+                //     return;
+                // });
+
+                // function toggleOptions (e) {
+                //     e.preventDefault();
+                //     if (e.keyCode === 69) {
+                //         blocker.style.display = 'none';
+                //         instructions.style.display = 'none';
+                //         controls.unlock();
+                //         options.style.display = 'block';
+                //         console.log("display options");
+                //         eKeyWasPressed = false;
+                //         console.log(eKeyWasPressed);
+                //     }
+                // }
+                // document.addEventListener('keydown', toggleOptions);
+
+                // // window.addEventListener('click', function () {
+                // //             console.log('works');
+                // //             controls.lock();
+                // //         })
 
                 scene.add(controls.getObject());
 
                 renderer = new THREE.WebGLRenderer( { antialias: true } );
-				renderer.setPixelRatio( window.devicePixelRatio );
-				renderer.setSize( window.innerWidth, window.innerHeight );
+                renderer.setClearColor(0x00ff00);
+		        renderer.setPixelRatio( window.devicePixelRatio );
+		        renderer.setSize( window.innerWidth, window.innerHeight );
                 document.body.appendChild( renderer.domElement );
-
-                var onKeyDown = function ( e ) {
-
-                    switch ( e.keyCode ) {
-
-                        case 38: // up
-                        case 87: // w
-                                moveForward = true;
-                                console.log(moveForward);
-                                break;
-
-                        case 37: // left
-                        case 65: // a
-                                moveLeft = true;
-                                break;
-
-                        case 40: // down
-                        case 83: // d
-                                moveBackward = true;
-                                break;
-
-                        case 39: // right
-                        case 68: // d
-                                moveRight = true;
-                                break;
-
-                        case 32: // up
-                                moveUp = true;
-                                break;
-
-                        case 16: // down
-                                moveDown = true;
-                                break;
-                            }
-                    };
-
-                    var onKeyUp = function ( e ) {
-
-                    switch ( e.keyCode ) {
-
-                        case 38: // up
-                        case 87: // w
-                                moveForward = false;
-                                break;
-
-                        case 37: // left
-                        case 65: // a
-                                moveLeft = false;
-                                break;
-
-                        case 40: // down
-                        case 83: // d
-                                moveBackward = false;
-                                break;
-
-                        case 39: // right
-                        case 68: // d
-                                moveRight = false;
-                                break;
-
-                        case 32: // up
-                                moveUp = false;
-                                break;
-
-                        case 16: // down
-                                moveDown = false;
-                                break;
-                            }
-                    };
-            document.addEventListener( 'keydown', onKeyDown, false);
-            document.addEventListener( 'keyup', onKeyUp, false);
-
-            function animate() {
-                    requestAnimationFrame( animate );
-
-					var time = performance.now();
-					var delta = ( time - prevTime ) / 1000;
-					velocity.x -= velocity.x * 7.5 * delta;
-                    velocity.z -= velocity.z * 7.5 * delta;
-                    velocity.y -= velocity.y * 7.5 * delta;
-
-					direction.z = Number( moveForward ) - Number( moveBackward );
-                    direction.x = Number( moveLeft ) - Number( moveRight );
-                    direction.y = Number( moveUp ) - Number( moveDown );
-					direction.normalize(); // this ensures consistent movements in all directions
-					if ( moveForward || moveBackward ) {
-                        console.log("works");
-                        velocity.z -= direction.z * 4000.0 * delta
-                    };
-					if ( moveLeft || moveRight ) {
-                        velocity.x -= direction.x * 4000.0 * delta
-                    };
-                    if (moveUp || moveDown) {
-                        velocity.y += direction.y * 4000.0 * delta
-                    }
-
-					controls.getObject().translateX( velocity.x * delta );
-					controls.getObject().translateY( velocity.y * delta );
-					controls.getObject().translateZ( velocity.z * delta );
-
-                    prevTime = time;
-                    renderer.render( scene, camera );
-                }
         }
 
+        mesh.addEventListener('mouseenter', function(e) {
+                console.log(e);
+            });
+
+        var onKeyDown = function ( e ) {
+
+switch ( e.keyCode ) {
+
+    case 38: // up
+    case 87: // w
+            moveForward = true;
+            console.log(moveForward);
+            break;
+
+    case 37: // left
+    case 65: // a
+            moveLeft = true;
+            break;
+
+    case 40: // down
+    case 83: // d
+            moveBackward = true;
+            break;
+
+    case 39: // right
+    case 68: // d
+            moveRight = true;
+            break;
+
+    case 32: // up
+            moveUp = true;
+            break;
+
+    case 16: // down
+            moveDown = true;
+            break;
+        }
+};
+
+var onKeyUp = function ( e ) {
+
+switch ( e.keyCode ) {
+
+    case 38: // up
+    case 87: // w
+            moveForward = false;
+            break;
+
+    case 37: // left
+    case 65: // a
+            moveLeft = false;
+            break;
+
+    case 40: // down
+    case 83: // d
+            moveBackward = false;
+            break;
+
+    case 39: // right
+    case 68: // d
+            moveRight = false;
+            break;
+
+    case 32: // up
+            moveUp = false;
+            break;
+
+    case 16: // down
+            moveDown = false;
+            break;
+        }
+};
+document.addEventListener( 'keydown', onKeyDown, false);
+document.addEventListener( 'keyup', onKeyUp, false);
+
+// var speedValue = 7.5;
 
 
 
+
+// var logSpeed = function () {
+//     console.log(speedValue);
+// }
+// speedValueInput.addEventListener('change', logSpeed);
+
+    function animate() {
+        // Work-in-progress change of movement speed
+
+        // var speedValueInput = document.querySelector('#speedvalueinput');
+        // var speedValueToggleButton = document.querySelector('#speedvaluetogglebutton');
+        // var speedValue = speedValueInput.value;
+        // var setSpeedValue = function () {
+        //     speedValue = speedValueInput.value * 40;
+        //     console.log(speedValue);
+        // };
+        // speedValueInput.addEventListener('change', setSpeedValue);
+
+        requestAnimationFrame( animate );
+
+        stats.update();
+
+        // var speedValue = 7.5;
+
+        var time = performance.now();
+        var delta = ( time - prevTime ) / 1000;
+        velocity.x -= velocity.x * 7.5 * delta;
+        velocity.z -= velocity.z * 7.5 * delta;
+        velocity.y -= velocity.y * 7.5 * delta;
+
+        // mesh.rotation.x += .01;
+        mesh.rotation.y = 50;
+
+        direction.z = Number( moveForward ) - Number( moveBackward );
+        direction.x = Number( moveLeft ) - Number( moveRight );
+        direction.y = Number( moveUp ) - Number( moveDown );
+        direction.normalize(); // this ensures consistent movements in all directions
+        if ( moveForward || moveBackward ) {
+            console.log("works");
+            velocity.z -= direction.z * 4000.0 * delta
+        };
+        if ( moveLeft || moveRight ) {
+            velocity.x -= direction.x * 4000.0 * delta
+        };
+        if (moveUp || moveDown) {
+            velocity.y += direction.y * 4000.0 * delta
+        }
+
+        controls.getObject().translateX( velocity.x * delta );
+        controls.getObject().translateY( velocity.y * delta );
+        controls.getObject().translateZ( velocity.z * delta );
+
+        prevTime = time;
+
+        renderer.render( scene, camera );
+    }
     </script>
 </body>
 </html>
