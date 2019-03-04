@@ -18,6 +18,7 @@
             <div class="list-group">
                     <button type="button" id="settingsbutton" class="list-group-item list-group-item-action">Settings</button>
                     <button type="button" id="cursortogglebutton" class="list-group-item list-group-item-action">Cursor: On</button>
+                    <button type="button" id="statstogglebutton" class="list-group-item list-group-item-action">Stats: On</button>
                     <span>
                         <input type="range" id="renderdistancevalueinput">
                         <div>Change Render Distance</div>
@@ -82,6 +83,20 @@
 
             stats = new Stats();
             container.appendChild(stats.dom);
+            var statsToggleButton = document.querySelector('#statstogglebutton');
+            var statsStatus = true;
+
+            var toggleStats = function() {
+                if (statsStatus) {
+                    container.style.display = 'none';
+                    statsStatus = false;
+                    console.log('works');
+                } else if (!statsStatus) {
+                    container.style.display = 'block';
+                    statsStatus = true;
+                }
+            }
+            statsToggleButton.addEventListener('click', toggleStats);
 
             camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.1, 35000);
 
@@ -107,6 +122,8 @@
 
             geometry = new THREE.BoxGeometry(1000, 1000, 1000);
 
+            geometry2 = new THREE.SphereGeometry(100, 100, 100);
+
             material = new THREE.MeshBasicMaterial({
             color: 0xff0000,
             transparent: true,
@@ -118,11 +135,28 @@
             wireframeLinecap: 'round'
         });
 
+            material2 = new THREE.MeshBasicMaterial({
+                color: 0xff0000,
+                transparent: true,
+                opacity: 1,
+                wireframe: true,
+                wireframeLinewidth: 5,
+                wireframeLinejoin: 'round',
+                wireframeLinecap: 'round'
+            });
+
             mesh = new THREE.Mesh(geometry, material);
             mesh.position.z = -1000;
-            mesh.position.x = 0;
+            mesh.position.x = 1000;
+
+            mesh2 = new THREE.Mesh(geometry2, material2);
+            mesh2.position.z = -1000;
+            mesh2.position.x = 1000;
 
             scene.add(mesh);
+            scene.add(mesh2);
+
+            console.log(mesh);
 
         controls = new THREE.PointerLockControls( camera );
 
@@ -192,47 +226,9 @@
                     }
                 });
 
-				//     document.addEventListener( 'keydown', function (e) {
-                //     // console.log(e.keyCode);
-                //     e.preventDefault();
-                //     if (e.keyCode === 27) {
-                //         console.log("works");
-				// 	    blocker.style.display = 'block';
-                //         instructions.style.display = '';
-                //         // controls.unlock();
-                //     }
-                // } );
-
-                // var eKeyWasPressed = false;
-                // document.addEventListener('keydown', function (e) {
-                //     e.preventDefault();
-                //     if (e.keyCode === 69) {
-                //         eKeyWasPressed = true;
-                //     }
-                //     console.log(eKeyWasPressed);
-                //     return;
-                // });
-
-                // function toggleOptions (e) {
-                //     e.preventDefault();
-                //     if (e.keyCode === 69) {
-                //         blocker.style.display = 'none';
-                //         instructions.style.display = 'none';
-                //         controls.unlock();
-                //         options.style.display = 'block';
-                //         console.log("display options");
-                //         eKeyWasPressed = false;
-                //         console.log(eKeyWasPressed);
-                //     }
-                // }
-                // document.addEventListener('keydown', toggleOptions);
-
-                // // window.addEventListener('click', function () {
-                // //             console.log('works');
-                // //             controls.lock();
-                // //         })
-
                 scene.add(controls.getObject());
+
+                raycaster = new THREE.Raycaster();
 
                 renderer = new THREE.WebGLRenderer( { antialias: true } );
                 renderer.setClearColor(0x00ff00);
@@ -240,94 +236,97 @@
 		        renderer.setSize( window.innerWidth, window.innerHeight );
                 document.body.appendChild( renderer.domElement );
 
-                const domEvents = new THREEx.DomEvents(camera, renderer.domElement);
+            //     const domEvents = new THREEx.DomEvents(camera, renderer.domElement);
 
-                domEvents.addEventListener(mesh, 'click', function (e) {
-                        console.log('works');
-                        material.wireframe = true;
-                    });
+            //     domEvents.addEventListener(mesh, 'click', function (e) {
+            //             console.log('works');
+            //             material.wireframe = true;
+            //         });
 
-                domEvents.addEventListener(mesh, 'mouseover', function(e) {
-                console.log(e);
-                material.wireframe = false;
-            });
+            //     domEvents.addEventListener(mesh, 'mouseover', function(e) {
+            //     console.log(e);
+            //     material.wireframe = false;
+            // });
+        }
+
+        function onDocumentMouseMove(e) {
+            event.preventDefault();
+            mouse.x = ( e.clientX / window.innerWidth ) * 2 - 1;
+            mouse.y = - ( e.clientY / window.innerHeight ) * 2 + 1;
         }
 
         var onKeyDown = function ( e ) {
 
-switch ( e.keyCode ) {
+        switch ( e.keyCode ) {
 
-    case 38: // up
-    case 87: // w
-            moveForward = true;
-            console.log(moveForward);
-            break;
+            case 38: // up
+            case 87: // w
+                    moveForward = true;
+                    console.log(moveForward);
+                    break;
 
-    case 37: // left
-    case 65: // a
-            moveLeft = true;
-            break;
+            case 37: // left
+            case 65: // a
+                    moveLeft = true;
+                    break;
 
-    case 40: // down
-    case 83: // d
-            moveBackward = true;
-            break;
+            case 40: // down
+            case 83: // d
+                    moveBackward = true;
+                    break;
 
-    case 39: // right
-    case 68: // d
-            moveRight = true;
-            break;
+            case 39: // right
+            case 68: // d
+                    moveRight = true;
+                    break;
 
-    case 32: // up
-            moveUp = true;
-            break;
+            case 32: // up
+                    moveUp = true;
+                    break;
 
-    case 16: // down
-            moveDown = true;
-            break;
-        }
-};
+            case 16: // down
+                    moveDown = true;
+                    break;
+                }
+        };
 
-var onKeyUp = function ( e ) {
+        var onKeyUp = function ( e ) {
 
-switch ( e.keyCode ) {
+        switch ( e.keyCode ) {
 
-    case 38: // up
-    case 87: // w
-            moveForward = false;
-            break;
+            case 38: // up
+            case 87: // w
+                    moveForward = false;
+                    break;
 
-    case 37: // left
-    case 65: // a
-            moveLeft = false;
-            break;
+            case 37: // left
+            case 65: // a
+                    moveLeft = false;
+                    break;
 
-    case 40: // down
-    case 83: // d
-            moveBackward = false;
-            break;
+            case 40: // down
+            case 83: // d
+                    moveBackward = false;
+                    break;
 
-    case 39: // right
-    case 68: // d
-            moveRight = false;
-            break;
+            case 39: // right
+            case 68: // d
+                    moveRight = false;
+                    break;
 
-    case 32: // up
-            moveUp = false;
-            break;
+            case 32: // up
+                    moveUp = false;
+                    break;
 
-    case 16: // down
-            moveDown = false;
-            break;
-        }
-};
-document.addEventListener( 'keydown', onKeyDown, false);
-document.addEventListener( 'keyup', onKeyUp, false);
+            case 16: // down
+                    moveDown = false;
+                    break;
+                }
+        };
+        document.addEventListener( 'keydown', onKeyDown, false);
+        document.addEventListener( 'keyup', onKeyUp, false);
 
 // var speedValue = 7.5;
-
-
-
 
 // var logSpeed = function () {
 //     console.log(speedValue);
@@ -381,6 +380,20 @@ document.addEventListener( 'keyup', onKeyUp, false);
         controls.getObject().translateZ( velocity.z * delta );
 
         prevTime = time;
+
+        raycaster.setFromCamera( mouse, camera );
+
+        var intersects = raycaster.intersectObjects( scene.children );
+        var intersectMat, intersectGeo, intersectObj;
+
+        if ( intersects.length > 0 ) {
+            console.log(intersects.length);
+            intersectMat = intersects[0].object.material;
+            intersectGeo = intersects[0].object.geometry;
+            intersectMat.wireframe = true;
+            } else if ( intersects.length <= 0 ) {
+                material.wireframe = false;
+            }
 
         renderer.render( scene, camera );
     }
