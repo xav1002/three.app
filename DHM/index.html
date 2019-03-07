@@ -44,6 +44,7 @@
         <div class="cursor-horizontal"></div>
 
     <script src="../three.js"></script>
+    <script src=""
     <script src="../FirstPersonControls.js"></script>
     <script src="../PointerLockControls.js"></script>
     <script src="..\three.js-master\examples\js\libs\stats.min.js"></script>
@@ -54,7 +55,7 @@
         // Options Tray - unlock controls
         // prevent(); ??
 
-        var camera, controls, scene, renderer, material, renderDistance, container, stats, raycaster;
+        var camera, controls, scene, renderer, material, renderDistance, container, stats;
 
         var moveForward = false;
         var moveBackward = false;
@@ -158,6 +159,25 @@
 
             console.log(mesh);
 
+        // var loader = new THREE.FontLoader();
+        // loader.load( '../three.js-master/examples/fonts/helvetiker_bold.typeface.json', function (font) {
+        //     var xMid, text;
+
+        //     var color = 0x006699;
+
+        //     var message = 'Bus';
+
+        //     var shapes = font.generateShapes(message, 50);
+
+        //     var busGeometry = new THREE.ShapeBufferGeometry ( shapes );
+        //     geometry.computeBoundingBox();
+        //     xMid = -.05 * (geometry.boundingBox.max.x - geometry.boundingBox.min.x);
+        //     geometry.translate( xMid, 0, 0);
+        //     text = new THREE.Mesh( busGeometry, material );
+        //     text.position.x = -2000;
+        //     scene.add(text);
+        // });
+
         controls = new THREE.PointerLockControls( camera );
 
         var options = document.querySelector('#optionsdiv');
@@ -228,25 +248,13 @@
 
                 scene.add(controls.getObject());
 
-                raycaster = new THREE.Raycaster();
-
                 renderer = new THREE.WebGLRenderer( { antialias: true } );
                 renderer.setClearColor(0x00ff00);
 		        renderer.setPixelRatio( window.devicePixelRatio );
 		        renderer.setSize( window.innerWidth, window.innerHeight );
                 document.body.appendChild( renderer.domElement );
 
-            //     const domEvents = new THREEx.DomEvents(camera, renderer.domElement);
-
-            //     domEvents.addEventListener(mesh, 'click', function (e) {
-            //             console.log('works');
-            //             material.wireframe = true;
-            //         });
-
-            //     domEvents.addEventListener(mesh, 'mouseover', function(e) {
-            //     console.log(e);
-            //     material.wireframe = false;
-            // });
+                // Alternate: domEvents Extension
         }
 
         function onDocumentMouseMove(e) {
@@ -333,6 +341,9 @@
 // }
 // speedValueInput.addEventListener('change', logSpeed);
 
+var itemId = 3;
+var meshPos = 0;
+
     function animate() {
         // Work-in-progress change of movement speed
 
@@ -365,7 +376,6 @@
         direction.y = Number( moveUp ) - Number( moveDown );
         direction.normalize(); // this ensures consistent movements in all directions
         if ( moveForward || moveBackward ) {
-            console.log("works");
             velocity.z -= direction.z * 4000.0 * delta
         };
         if ( moveLeft || moveRight ) {
@@ -381,22 +391,60 @@
 
         prevTime = time;
 
-        raycaster.setFromCamera( mouse, camera );
+        render();
+    }
 
+    var hover = false;
+    var hover1;
+
+    var raycaster;
+
+    function render() {
+        raycaster = new THREE.Raycaster();
+        raycaster.setFromCamera( mouse, camera );
         var intersects = raycaster.intersectObjects( scene.children );
         var intersectMat, intersectGeo, intersectObj;
 
-        if ( intersects.length > 0 ) {
-            console.log(intersects.length);
-            intersectMat = intersects[0].object.material;
-            intersectGeo = intersects[0].object.geometry;
-            intersectMat.wireframe = true;
-            } else if ( intersects.length <= 0 ) {
-                material.wireframe = false;
+        var isIntersecting;
+
+            if(intersects.length > 0) {
+                isIntersecting = true;
+            } else if(intersects.length <= 0) {
+                isIntersecting = false;
             }
 
-        renderer.render( scene, camera );
-    }
+        switch (isIntersecting) {
+            case true:
+                intersectObj = intersects[0].object;
+                intersectMat = intersects[0].object.material;
+                intersectGeo = intersects[0].object.geometry;
+                intersectMat.wireframe = true;
+                hover = true;
+                break;
+
+            case false:
+                material.wireframe = false;
+                hover = false;
+                break;
+            }
+
+        renderer.render(scene, camera);
+        }
+
+        var addNewMesh = function() {
+            if(hover){
+                var newMesh = new THREE.Mesh(geometry, material);
+                newMesh.position.x = meshPos;
+                scene.add(newMesh);
+                meshPos -= 1000;
+                console.log(newMesh);
+                console.log(hover);
+            } else if(!hover){
+                return;
+            }
+            };
+            window.addEventListener('click', addNewMesh);
+
     </script>
 </body>
 </html>
