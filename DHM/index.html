@@ -7,7 +7,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-    <link rel="stylesheet" type="text/css" media="screen" href="main1.css">
+    <link rel="stylesheet" type="text/css" media="screen" href="main.css">
 </head>
 <body>
         <!-- <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
@@ -15,21 +15,33 @@
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script> -->
 
     <div id="optionsdiv">
-            <div class="list-group">
-                    <button type="button" id="settingsbutton" class="list-group-item list-group-item-action">Settings</button>
-                    <button type="button" id="cursortogglebutton" class="list-group-item list-group-item-action">Cursor: On</button>
-                    <button type="button" id="statstogglebutton" class="list-group-item list-group-item-action">Stats: On</button>
-                    <span>
-                        <input type="range" id="renderdistancevalueinput">
-                        <div>Change Render Distance</div>
-                    </span>
-                    <span>
-                        <input type="range" id="speedvalueinput">
-                        <div>Change Movement Speed</div>
-                    </span>
-                    <button type="button" id="optionsexitbutton" class="list-group-item list-group-item-action">Exit</button>
-                  </div>
+        <div class="list-group">
+            <button type="button" id="settingsbutton" class="list-group-item list-group-item-action">Settings</button>
+            <button type="button" id="cursortogglebutton" class="list-group-item list-group-item-action">Cursor: On</button>
+            <button type="button" id="statstogglebutton" class="list-group-item list-group-item-action">Stats: On</button>
+            <span>
+                <input type="range" id="renderdistancevalueinput">
+                <div>Change Render Distance</div>
+            </span>
+            <span>
+                <input type="range" id="speedvalueinput">
+                <div>Change Movement Speed</div>
+            </span>
+            <button type="button" id="optionsexitbutton" class="list-group-item list-group-item-action">Exit</button>
+            </div>
     </div>
+
+    <div id="objectoptionsdiv">
+        <div class="list-group">
+            <button type="button" id="addmeshbutton" class="list-group-item list-group-item-action">Add New Unit</button>
+            <button type="button" id="deletemeshbutton" class="list-group-item list-group-item-action">Delete Unit</button>
+            <button type="button" id="lockpositiontogglebutton" class="list-group-item list-group-item-action">Unit Position: Fixed</button>
+            <button type="button" id="objectoptionsexitbutton" class="list-group-item list-group-item-action">Exit</button>
+            </div>
+    </div>
+
+    <div id="selectiondiv"></div>
+
     <div id="blocker">
 
         <div id="instructions">
@@ -43,10 +55,9 @@
         <div class="cursor-vertical"></div>
         <div class="cursor-horizontal"></div>
 
-    <script src="../three.js"></script>
-    <script src=""
-    <script src="../FirstPersonControls.js"></script>
-    <script src="../PointerLockControls.js"></script>
+    <script src="../three.js-master/build/three.js"></script>
+    <script src="../three.js-master/examples/js/controls/FirstPersonControls.js"></script>
+    <script src="../three.js-master/examples/js/controls/PointerLockControls.js"></script>
     <script src="..\three.js-master\examples\js\libs\stats.min.js"></script>
     <script src="..\threex.domevents\threex.domevents.js"></script>
 
@@ -71,6 +82,9 @@
         var vertex = new THREE.Vector3();
 
         var mouse = new THREE.Vector2(), INTERSECTED;
+
+        camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.1, 35000);
+        controls = new THREE.PointerLockControls( camera );
 
         init();
         animate();
@@ -98,8 +112,6 @@
                 }
             }
             statsToggleButton.addEventListener('click', toggleStats);
-
-            camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.1, 35000);
 
             // Work-in-progress render distance change
 
@@ -178,34 +190,29 @@
         //     scene.add(text);
         // });
 
-        controls = new THREE.PointerLockControls( camera );
-
         var options = document.querySelector('#optionsdiv');
-        options.style.display = 'none';
-        var optionsExitButton = document.querySelector('#optionsexitbutton');
-        var cursorToggleButton = document.querySelector('#cursortogglebutton');
-        console.log(cursorToggleButton);
-        var cursor = document.querySelector('#cursor');
-        var cursorVert = document.querySelector('.cursor-vertical');
-        cursorVert.style.top = Number((window.innerHeight / 2) - 10) + 'px';
-        cursorVert.style.left = Number((window.innerWidth /2) - 3/2) + 'px';
-        var cursorHorizon = document.querySelector('.cursor-horizontal');
-        cursorHorizon.style.top = Number((window.innerHeight / 2) - 3/2) + 'px';
-        cursorHorizon.style.left = Number((window.innerWidth / 2) - 10) + 'px';
-        console.log(cursorVert, cursorHorizon);
-        var renderDistanceToggle = document.querySelector('#renderdistancetoggle');
+    options.style.display = 'none';
+    var optionsExitButton = document.querySelector('#optionsexitbutton');
+    var cursorToggleButton = document.querySelector('#cursortogglebutton');
+    var cursor = document.querySelector('#cursor');
+    var cursorVert = document.querySelector('.cursor-vertical');
+    cursorVert.style.top = Number((window.innerHeight / 2) - 10) + 'px';
+    cursorVert.style.left = Number((window.innerWidth / 2) - 3/2) + 'px';
+    var cursorHorizon = document.querySelector('.cursor-horizontal');
+    cursorHorizon.style.top = Number((window.innerHeight / 2) - 3/2) + 'px';
+    cursorHorizon.style.left = Number((window.innerWidth / 2) - 10) + 'px';
+    var renderDistanceToggle = document.querySelector('#renderdistancetoggle');
 
-        var body = document.querySelector('body');
-        var blocker = document.getElementById('blocker');
-        var instructions = document.getElementById('instructions');
+    var body = document.querySelector('body');
+    var blocker = document.getElementById('blocker');
+    var instructions = document.getElementById('instructions');
 
-				blocker.addEventListener( 'click', function () {
-                    controls.lock();
-                    console.log("works");
-				}, false );
-				controls.addEventListener( 'lock', function () {
-					instructions.style.display = 'none';
-					blocker.style.display = 'none';
+    blocker.addEventListener( 'click', function () {
+            controls.lock();
+		    }, false );
+		controls.addEventListener( 'lock', function () {
+			instructions.style.display = 'none';
+			blocker.style.display = 'none';
                 } );
 
                 // controls.addEventListener( 'unlock', function () {
@@ -213,38 +220,51 @@
 				// 	instructions.style.display = '';
                 // } );
 
-                window.addEventListener('keydown', function (e) {
-                    e.preventDefault();
-                    if (e.keyCode === 69 && blocker.style.display === 'none') {
-                        console.log("works");
-                        options.style.display = 'block';
-                        controls.unlock();
-                    } else if (e.keyCode === 27 && options.style.display !== 'block') {
-                        instructions.style.display = '';
-                        blocker.style.display = 'block';
-                    }
-                });
+        window.addEventListener('keydown', function (e) {
+            e.preventDefault();
+            if (e.keyCode === 69 && blocker.style.display === 'none' && objectOptionsDiv.style.display !== 'blocl') {
+                console.log("works");
+                options.style.display = 'block';
+                controls.unlock();
+            } else if (e.keyCode === 27 && options.style.display === 'none' && objectOptionsDiv.style.display !== 'block') {
+                instructions.style.display = '';
+                blocker.style.display = 'block';
+            }
+        });
 
-                optionsExitButton.addEventListener('click', function () {
-                    options.style.display = 'none';
-                    controls.lock();
-                });
+        optionsExitButton.addEventListener('click', function () {
+            options.style.display = 'none';
+            controls.lock();
+        });
 
+        // var resumeControlsLock = function() {
+        //     if(options.style.display === 'block') {
+        //         options.style.display = 'none';
+
+        //     } else if (objectOptionsDiv.style.display === 'block') {
+        //         objectOptionsDiv.style.display = 'none';
+        //         console.log('works');
+        //     }
+        //     controls.lock();
+        // }
+        // optionsExitButton.addEventListener('click', resumeControlsLock);
+        // objectOptionsExitButton.addEventListener('click', resumeControlsLock);
+
+        cursorVert.style.display = 'block';
+
+        cursorToggleButton.addEventListener('click', function () {
+            if (cursorVert.style.display === 'block') {
+            cursorVert.style.display = 'none';
+            cursorHorizon.style.display = 'none';
+            cursorToggleButton.innerText = 'Cursor: Off';
+            console.log("works");
+            } else if (cursorVert.style.display === 'none') {
                 cursorVert.style.display = 'block';
-
-                cursorToggleButton.addEventListener('click', function () {
-                    if (cursorVert.style.display === 'block') {
-                    cursorVert.style.display = 'none';
-                    cursorHorizon.style.display = 'none';
-                    cursorToggleButton.innerText = 'Cursor: Off';
-                    console.log("works");
-                    } else if (cursorVert.style.display === 'none') {
-                        cursorVert.style.display = 'block';
-                        cursorHorizon.style.display = 'block';
-                        cursorToggleButton.innerText = 'Cursor: On';
-                        console.log("works");
-                    }
-                });
+                cursorHorizon.style.display = 'block';
+                cursorToggleButton.innerText = 'Cursor: On';
+                console.log("works");
+            }
+        });
 
                 scene.add(controls.getObject());
 
@@ -341,7 +361,6 @@
 // }
 // speedValueInput.addEventListener('change', logSpeed);
 
-var itemId = 3;
 var meshPos = 0;
 
     function animate() {
@@ -397,12 +416,12 @@ var meshPos = 0;
     var hover = false;
     var hover1;
 
-    var raycaster;
+    var raycaster, intersects;
 
     function render() {
         raycaster = new THREE.Raycaster();
         raycaster.setFromCamera( mouse, camera );
-        var intersects = raycaster.intersectObjects( scene.children );
+        intersects = raycaster.intersectObjects( scene.children );
         var intersectMat, intersectGeo, intersectObj;
 
         var isIntersecting;
@@ -429,12 +448,44 @@ var meshPos = 0;
             }
 
         renderer.render(scene, camera);
+        return intersects;
         }
+
+        console.log(intersects);
+
+        var positionFixed = true;
+        var objectOptionsDiv = document.querySelector('#objectoptionsdiv');
+        objectOptionsDiv.style.display = 'none';
+    var addMeshButton = document.querySelector('#addmeshbutton');
+    var deleteMeshButton = document.querySelector('#deletemeshbutton');
+    var lockPositionToggleButton = document.querySelector('#lockpositiontogglebutton');
+    var objectOptionsExitButton = document.querySelector('#objectoptionsexitbutton');
+    var selectionDiv = document.querySelector('#selectiondiv');
+    selectionDiv.style.top = Number((window.innerHeight / 2) - 15) + 'px';
+    selectionDiv.style.left = Number((window.innerWidth / 2) - 20) + 'px';
+
+        var openObjectOptions = function() {
+            console.log('works');
+            if(hover && objectOptionsDiv.style.display === 'none'){
+                console.log(objectOptionsDiv.style.display);
+                objectOptionsDiv.style.display = 'block';
+                controls.unlock();
+            }
+        };
+        selectionDiv.addEventListener('click', openObjectOptions);
+
+        objectOptionsExitButton.addEventListener('click', function () {
+            if(hover){
+            objectOptionsDiv.style.display = 'none';
+            controls.lock();
+            console.log('works');
+            }
+        });
 
         var addNewMesh = function() {
             if(hover){
                 var newMesh = new THREE.Mesh(geometry, material);
-                newMesh.position.x = meshPos;
+                newMesh.position.z = meshPos;
                 scene.add(newMesh);
                 meshPos -= 1000;
                 console.log(newMesh);
@@ -442,8 +493,22 @@ var meshPos = 0;
             } else if(!hover){
                 return;
             }
-            };
-            window.addEventListener('click', addNewMesh);
+        };
+        addMeshButton.addEventListener('click', addNewMesh);
+
+        var deleteMesh = function() {
+            if(hover){
+                var intersectObj = intersects[0].object;
+                var intersectMat = intersects[0].object.material;
+                var intersectGeo = intersects[0].object.geometry;
+                scene.removeChild(intersectObj);
+            }
+        }
+        deleteMeshButton.addEventListener('click', deleteMesh);
+
+            // 12 = x
+            // 13 = y
+            // 14 = z
 
     </script>
 </body>
