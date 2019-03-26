@@ -31,16 +31,18 @@
             </div>
     </div>
 
+    <div id="detailsdivmesh"></div>
+
     <div id="objectoptionsdiv">
         <div class="list-group">
-            <button type="button" id="addmeshbutton" class="list-group-item list-group-item-action">Add New Unit</button>
+            <button id="addmeshbutton" class="btn btn-secondary btn-lg dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Add New Mesh
+              </button>
             <button type="button" id="deletemeshbutton" class="list-group-item list-group-item-action">Delete Unit</button>
             <button type="button" id="lockpositiontogglebutton" class="list-group-item list-group-item-action">Unit Position: Fixed</button>
             <button type="button" id="objectoptionsexitbutton" class="list-group-item list-group-item-action">Exit</button>
             </div>
     </div>
-
-    <div id="selectiondiv"></div>
 
     <div id="blocker">
 
@@ -61,83 +63,85 @@
     <script src="..\three.js-master\examples\js\libs\stats.min.js"></script>
     <script src="..\threex.domevents\threex.domevents.js"></script>
 
-    <script>
-        // Change Speeds
-        // Options Tray - unlock controls
-        // prevent(); ??
+<script>
+    // Change Speeds
+    // Checkpoint Locations
+    // Bezier Squiggle for Shapes
 
-        var camera, controls, scene, renderer, material, renderDistance, container, stats;
+    var camera, controls, scene, renderer, material, renderDistance, container, stats, canvas;
 
-        var moveForward = false;
-        var moveBackward = false;
-        var moveLeft = false;
-        var moveRight = false;
-        var moveUp = false;
-        var moveDown = false;
-        var canJump = false;
+    var moveForward = false;
+    var moveBackward = false;
+    var moveLeft = false;
+    var moveRight = false;
+    var moveUp = false;
+    var moveDown = false;
+    var canJump = false;
 
-        var prevTime = performance.now();
-        var velocity = new THREE.Vector3();
-        var direction = new THREE.Vector3();
-        var vertex = new THREE.Vector3();
+    var prevTime = performance.now();
+    var velocity = new THREE.Vector3();
+    var direction = new THREE.Vector3();
+    var vertex = new THREE.Vector3();
 
-        var mouse = new THREE.Vector2(), INTERSECTED;
+    var mouse = new THREE.Vector2(), INTERSECTED;
 
-        camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.1, 35000);
-        controls = new THREE.PointerLockControls( camera );
+    camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.1, 35000);
+    controls = new THREE.PointerLockControls( camera );
 
-        init();
-        animate();
+    init();
+    animate();
 
-        function init () {
+    function init () {
 
-            // Work-in-progress statistical analysis div
+        // Work-in-progress statistical analysis div
 
-            container = document.createElement('div');
-            document.body.appendChild(container);
+        container = document.createElement('div');
+        container.style.position = 'absolute';
+        container.style.right = 0;
+        document.body.appendChild(container);
 
-            stats = new Stats();
-            container.appendChild(stats.dom);
-            var statsToggleButton = document.querySelector('#statstogglebutton');
-            var statsStatus = true;
+        stats = new Stats();
+        container.appendChild(stats.dom);
+        var statsToggleButton = document.querySelector('#statstogglebutton');
+        var statsStatus = true;
 
-            var toggleStats = function() {
-                if (statsStatus) {
-                    container.style.display = 'none';
-                    statsStatus = false;
-                    console.log('works');
-                } else if (!statsStatus) {
-                    container.style.display = 'block';
-                    statsStatus = true;
-                }
+        var toggleStats = function() {
+            if (statsStatus) {
+                container.style.display = 'none';
+                statsStatus = false;
+                console.log('works');
+            } else if (!statsStatus) {
+                container.style.display = 'block';
+                statsStatus = true;
             }
-            statsToggleButton.addEventListener('click', toggleStats);
+        }
+        statsToggleButton.addEventListener('click', toggleStats);
 
-            // Work-in-progress render distance change
+        // Work-in-progress render distance change
 
-            // var renderDistanceValueInput = document.querySelector("#renderdistancevalueinput");
-            // renderDistance = renderDistanceValueInput.value * 1000 + 3000
-            // console.log(renderDistanceValueInput.value);
-            // var setRenderDistance = function () {
-            //     renderDistance = renderDistanceValueInput.value * 1000 + 3000;
-            //     camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.1, renderDistance);
-            //     console.log(renderDistance);
-            // }
-            // renderDistanceValueInput.addEventListener('change', setRenderDistance);
+        // var renderDistanceValueInput = document.querySelector("#renderdistancevalueinput");
+        // renderDistance = renderDistanceValueInput.value * 1000 + 3000
+        // console.log(renderDistanceValueInput.value);
+        // var setRenderDistance = function () {
+        //     renderDistance = renderDistanceValueInput.value * 1000 + 3000;
+        //     camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.1, renderDistance);
+        //     console.log(renderDistance);
+        // }
+        // renderDistanceValueInput.addEventListener('change', setRenderDistance);
 
-            scene = new THREE.Scene();
+        scene = new THREE.Scene();
 
-            var light = new THREE.AmbientLight(0xffffff, 0.5);
-            scene.add(light);
+        var light = new THREE.AmbientLight(0xffffff, 0.5);
+        scene.add(light);
 
-            var light1 = new THREE.PointLight(0xffffff, 0.5);
-            scene.add(light1);
+        var light1 = new THREE.PointLight(0xffffff, 0.5);
+        scene.add(light1);
 
-            geometry = new THREE.BoxGeometry(1000, 1000, 1000);
+        geometry = new THREE.BoxGeometry(1000, 1000, 1000);
 
-            geometry2 = new THREE.SphereGeometry(100, 100, 100);
+        geometry2 = new THREE.SphereGeometry(100, 100, 100);
 
-            material = new THREE.MeshBasicMaterial({
+        material = new THREE.MeshBasicMaterial({
             color: 0xff0000,
             transparent: true,
             opacity: 1,
@@ -148,28 +152,28 @@
             wireframeLinecap: 'round'
         });
 
-            material2 = new THREE.MeshBasicMaterial({
-                color: 0xff0000,
-                transparent: true,
-                opacity: 1,
-                wireframe: true,
-                wireframeLinewidth: 5,
-                wireframeLinejoin: 'round',
-                wireframeLinecap: 'round'
-            });
+        material2 = new THREE.MeshBasicMaterial({
+            color: 0xff0000,
+            transparent: true,
+            opacity: 1,
+            wireframe: true,
+            wireframeLinewidth: 5,
+            wireframeLinejoin: 'round',
+            wireframeLinecap: 'round'
+        });
 
-            mesh = new THREE.Mesh(geometry, material);
-            mesh.position.z = -1000;
-            mesh.position.x = 1000;
+        mesh = new THREE.Mesh(geometry, material);
+        mesh.position.z = -1000;
+        mesh.position.x = 1000;
 
-            mesh2 = new THREE.Mesh(geometry2, material2);
-            mesh2.position.z = -1000;
-            mesh2.position.x = 1000;
+        mesh2 = new THREE.Mesh(geometry2, material2);
+        mesh2.position.z = -1000;
+        mesh2.position.x = 1000;
 
-            scene.add(mesh);
-            scene.add(mesh2);
+        scene.add(mesh);
+        scene.add(mesh2);
 
-            console.log(mesh);
+        console.log(mesh);
 
         // var loader = new THREE.FontLoader();
         // loader.load( '../three.js-master/examples/fonts/helvetiker_bold.typeface.json', function (font) {
@@ -191,38 +195,34 @@
         // });
 
         var options = document.querySelector('#optionsdiv');
-    options.style.display = 'none';
-    var optionsExitButton = document.querySelector('#optionsexitbutton');
-    var cursorToggleButton = document.querySelector('#cursortogglebutton');
-    var cursor = document.querySelector('#cursor');
-    var cursorVert = document.querySelector('.cursor-vertical');
-    cursorVert.style.top = Number((window.innerHeight / 2) - 10) + 'px';
-    cursorVert.style.left = Number((window.innerWidth / 2) - 3/2) + 'px';
-    var cursorHorizon = document.querySelector('.cursor-horizontal');
-    cursorHorizon.style.top = Number((window.innerHeight / 2) - 3/2) + 'px';
-    cursorHorizon.style.left = Number((window.innerWidth / 2) - 10) + 'px';
-    var renderDistanceToggle = document.querySelector('#renderdistancetoggle');
+        options.style.display = 'none';
+        var optionsExitButton = document.querySelector('#optionsexitbutton');
+        var cursorToggleButton = document.querySelector('#cursortogglebutton');
+        var cursor = document.querySelector('#cursor');
+        var cursorVert = document.querySelector('.cursor-vertical');
+        cursorVert.style.display = 'block';
+        cursorVert.style.top = Number((window.innerHeight / 2) - 10) + 'px';
+        cursorVert.style.left = Number((window.innerWidth / 2) - 3/2) + 'px';
+        var cursorHorizon = document.querySelector('.cursor-horizontal');
+        cursorHorizon.style.top = Number((window.innerHeight / 2) - 3/2) + 'px';
+        cursorHorizon.style.left = Number((window.innerWidth / 2) - 10) + 'px';
+        var renderDistanceToggle = document.querySelector('#renderdistancetoggle');
 
-    var body = document.querySelector('body');
-    var blocker = document.getElementById('blocker');
-    var instructions = document.getElementById('instructions');
+        var body = document.querySelector('body');
+        var blocker = document.getElementById('blocker');
+        var instructions = document.getElementById('instructions');
 
-    blocker.addEventListener( 'click', function () {
-            controls.lock();
-		    }, false );
-		controls.addEventListener( 'lock', function () {
-			instructions.style.display = 'none';
-			blocker.style.display = 'none';
-                } );
-
-                // controls.addEventListener( 'unlock', function () {
-				// 	blocker.style.display = 'block';
-				// 	instructions.style.display = '';
-                // } );
+        blocker.addEventListener( 'click', function () {
+                controls.lock();
+                }, false );
+            controls.addEventListener( 'lock', function () {
+                instructions.style.display = 'none';
+                blocker.style.display = 'none';
+                    } );
 
         window.addEventListener('keydown', function (e) {
             e.preventDefault();
-            if (e.keyCode === 69 && blocker.style.display === 'none' && objectOptionsDiv.style.display !== 'blocl') {
+            if (e.keyCode === 69 && blocker.style.display === 'none' && objectOptionsDiv.style.display !== 'block') {
                 console.log("works");
                 options.style.display = 'block';
                 controls.unlock();
@@ -236,21 +236,6 @@
             options.style.display = 'none';
             controls.lock();
         });
-
-        // var resumeControlsLock = function() {
-        //     if(options.style.display === 'block') {
-        //         options.style.display = 'none';
-
-        //     } else if (objectOptionsDiv.style.display === 'block') {
-        //         objectOptionsDiv.style.display = 'none';
-        //         console.log('works');
-        //     }
-        //     controls.lock();
-        // }
-        // optionsExitButton.addEventListener('click', resumeControlsLock);
-        // objectOptionsExitButton.addEventListener('click', resumeControlsLock);
-
-        cursorVert.style.display = 'block';
 
         cursorToggleButton.addEventListener('click', function () {
             if (cursorVert.style.display === 'block') {
@@ -266,24 +251,28 @@
             }
         });
 
-                scene.add(controls.getObject());
+        scene.add(controls.getObject());
 
-                renderer = new THREE.WebGLRenderer( { antialias: true } );
-                renderer.setClearColor(0x00ff00);
-		        renderer.setPixelRatio( window.devicePixelRatio );
-		        renderer.setSize( window.innerWidth, window.innerHeight );
-                document.body.appendChild( renderer.domElement );
+        renderer = new THREE.WebGLRenderer( { antialias: true } );
+        renderer.setClearColor(0x00ff00);
+        renderer.setPixelRatio( window.devicePixelRatio );
+        renderer.setSize( window.innerWidth, window.innerHeight );
+        document.body.appendChild( renderer.domElement );
 
-                // Alternate: domEvents Extension
+        canvas = renderer.domElement;
+
+        return renderer;
+
+        // Alternate: domEvents Extension
         }
 
-        function onDocumentMouseMove(e) {
+    function onDocumentMouseMove(e) {
             event.preventDefault();
             mouse.x = ( e.clientX / window.innerWidth ) * 2 - 1;
             mouse.y = - ( e.clientY / window.innerHeight ) * 2 + 1;
         }
 
-        var onKeyDown = function ( e ) {
+    var onKeyDown = function ( e ) {
 
         switch ( e.keyCode ) {
 
@@ -318,7 +307,7 @@
                 }
         };
 
-        var onKeyUp = function ( e ) {
+    var onKeyUp = function ( e ) {
 
         switch ( e.keyCode ) {
 
@@ -351,17 +340,15 @@
                     break;
                 }
         };
-        document.addEventListener( 'keydown', onKeyDown, false);
-        document.addEventListener( 'keyup', onKeyUp, false);
+    document.addEventListener( 'keydown', onKeyDown, false);
+    document.addEventListener( 'keyup', onKeyUp, false);
 
-// var speedValue = 7.5;
+    // var speedValue = 7.5;
 
-// var logSpeed = function () {
-//     console.log(speedValue);
-// }
-// speedValueInput.addEventListener('change', logSpeed);
-
-var meshPos = 0;
+    // var logSpeed = function () {
+    //     console.log(speedValue);
+    // }
+    // speedValueInput.addEventListener('change', logSpeed);
 
     function animate() {
         // Work-in-progress change of movement speed
@@ -414,15 +401,12 @@ var meshPos = 0;
     }
 
     var hover = false;
-    var hover1;
-
     var raycaster, intersects;
 
     function render() {
         raycaster = new THREE.Raycaster();
         raycaster.setFromCamera( mouse, camera );
         intersects = raycaster.intersectObjects( scene.children );
-        var intersectMat, intersectGeo, intersectObj;
 
         var isIntersecting;
 
@@ -434,15 +418,10 @@ var meshPos = 0;
 
         switch (isIntersecting) {
             case true:
-                intersectObj = intersects[0].object;
-                intersectMat = intersects[0].object.material;
-                intersectGeo = intersects[0].object.geometry;
-                intersectMat.wireframe = true;
                 hover = true;
                 break;
 
             case false:
-                material.wireframe = false;
                 hover = false;
                 break;
             }
@@ -451,65 +430,73 @@ var meshPos = 0;
         return intersects;
         }
 
-        console.log(intersects);
-
-        var positionFixed = true;
-        var objectOptionsDiv = document.querySelector('#objectoptionsdiv');
-        objectOptionsDiv.style.display = 'none';
+    var positionFixed = true;
+    var objectOptionsDiv = document.querySelector('#objectoptionsdiv');
+    objectOptionsDiv.style.display = 'none';
+    var detailsDivMesh = document.querySelector('#detailsdivmesh');
+    detailsDivMesh.style.display = 'none';
+    detailsDivMesh.innerHTML = 'This is the original mesh. Inside is a sphere mesh. The wireframe means it is being hovered over';
     var addMeshButton = document.querySelector('#addmeshbutton');
     var deleteMeshButton = document.querySelector('#deletemeshbutton');
     var lockPositionToggleButton = document.querySelector('#lockpositiontogglebutton');
     var objectOptionsExitButton = document.querySelector('#objectoptionsexitbutton');
-    var selectionDiv = document.querySelector('#selectiondiv');
-    selectionDiv.style.top = Number((window.innerHeight / 2) - 15) + 'px';
-    selectionDiv.style.left = Number((window.innerWidth / 2) - 20) + 'px';
 
-        var openObjectOptions = function() {
+    // Hover => show; Click => Stay;
+    var openObjectDetails = function() {
+        if(hover) {
+            detailsDivMesh.style.display = 'block';
             console.log('works');
-            if(hover && objectOptionsDiv.style.display === 'none'){
-                console.log(objectOptionsDiv.style.display);
-                objectOptionsDiv.style.display = 'block';
-                controls.unlock();
-            }
-        };
-        selectionDiv.addEventListener('click', openObjectOptions);
-
-        objectOptionsExitButton.addEventListener('click', function () {
-            if(hover){
-            objectOptionsDiv.style.display = 'none';
-            controls.lock();
-            console.log('works');
-            }
-        });
-
-        var addNewMesh = function() {
-            if(hover){
-                var newMesh = new THREE.Mesh(geometry, material);
-                newMesh.position.z = meshPos;
-                scene.add(newMesh);
-                meshPos -= 1000;
-                console.log(newMesh);
-                console.log(hover);
-            } else if(!hover){
-                return;
-            }
-        };
-        addMeshButton.addEventListener('click', addNewMesh);
-
-        var deleteMesh = function() {
-            if(hover){
-                var intersectObj = intersects[0].object;
-                var intersectMat = intersects[0].object.material;
-                var intersectGeo = intersects[0].object.geometry;
-                scene.removeChild(intersectObj);
-            }
+            } else if(!hover) {
+                detailsDivMesh.style.display = 'none';
         }
-        deleteMeshButton.addEventListener('click', deleteMesh);
+    }
+    window.addEventListener('mousemove', openObjectDetails);
 
-            // 12 = x
-            // 13 = y
-            // 14 = z
+    objectOptionsExitButton.addEventListener('click', function () {
+        objectOptionsDiv.style.display = 'none';
+        controls.lock();
+        console.log('works');
+        return;
+    });
 
-    </script>
+    var openObjectOptions = function() {
+        console.log(controls);
+        if(hover && objectOptionsDiv.style.display === 'none' && controls.isLocked === true){
+            console.log(objectOptionsDiv.style.display);
+            objectOptionsDiv.style.display = 'block';
+            controls.unlock();
+            isDivOpen = true;
+            return;
+        }
+    };
+    window.addEventListener('click', openObjectOptions);
+
+    // Custom Dropdown Menu
+    var addNewMesh = function() {
+        if(hover){
+            var newMesh = new THREE.Mesh(geometry, material);
+            newMesh.position.z = 1000;
+            scene.add(newMesh);
+        } else if(!hover){
+            return;
+        }
+    };
+    addMeshButton.addEventListener('click', addNewMesh);
+
+    var deleteMesh = function() {
+        if(hover){
+            var intersectObj = intersects[0].object;
+            var intersectMat = intersects[0].object.material;
+            var intersectGeo = intersects[0].object.geometry;
+            scene.remove(intersectObj);
+        }
+    }
+    deleteMeshButton.addEventListener('click', deleteMesh);
+
+        // 12 = x
+        // 13 = y
+        // 14 = z
+
+</script>
 </body>
 </html>

@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Snake Game</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" media="screen" href="main.css">
+</head>
+<body>
+
+    <script src="../three.js-master/build/three.js"></script>
+
+    <script>
+
+        var camera, scene, renderer, material;
+
+        var moveForward = false;
+    var moveBackward = false;
+    var moveLeft = false;
+    var moveRight = false;
+    var moveUp = false;
+    var moveDown = false;
+    var canJump = false;
+
+    var prevTime = performance.now();
+    var velocity = new THREE.Vector3();
+    var direction = new THREE.Vector3();
+    var vertex = new THREE.Vector3();
+
+        init();
+        animate();
+
+        function init() {
+            camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.1, 35000);
+
+            scene = new THREE.Scene();
+
+            var light = new THREE.AmbientLight(0xffffff, 0.5);
+            scene.add(light);
+
+            var light1 = new THREE.PointLight(0xffffff, 0,5);
+            scene.add(light1);
+
+            // snake1Body1.position.x = -1575;
+            // snake1Body1.position.z = -3500;
+            // scene.add(snake1Head, snake1Body1);
+            // scene.add(snake1Head, snake1Body1, snake1Body2, snake1Body3, snake1Body4, snake1Body5, snake1Body6, 
+            // snake1Body7, snake1Body8, snake1Body9, snake1Body10);
+
+
+            // var numbers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+            // console.log('works');
+            // for(var i = 0; i = 10; i += 1) {
+            //     console.log('works');
+            //     var snake1Bodynumbers[i] = new THREE.BoxGeometry(10, 10, 10);
+            //     console.log(snake1Body1, snake1Body2);
+            // }
+
+            var snake2Head = new THREE.BoxGeometry(20, 20, 20);
+            var snake2Body1 = new THREE.BoxGeometry(10, 10, 10);
+            var snake2Body2 = new THREE.BoxGeometry(10, 10, 10);
+            var snake2Body3 = new THREE.BoxGeometry(10, 10, 10);
+            var snake2Body4 = new THREE.BoxGeometry(10, 10, 10);
+            var snake2Body5 = new THREE.BoxGeometry(10, 10, 10);
+            var snake2Body6 = new THREE.BoxGeometry(10, 10, 10);
+            var snake2Body7 = new THREE.BoxGeometry(10, 10, 10);
+            var snake2Body8 = new THREE.BoxGeometry(10, 10, 10);
+            var snake2Body9 = new THREE.BoxGeometry(10, 10, 10);
+            var snake2Body10 = new THREE.BoxGeometry(10, 10, 10);
+            // scene.add(snake2Head, snake2Body1, snake2Body2, snake2Body3, snake2Body4, snake2Body5, snake2Body6, 
+            // snake2Body7, snake2Body8, snake2Body9, snake2Body10);
+
+            renderer = new THREE.WebGLRenderer( {antialias: true} );
+            renderer.setClearColor(0x00ff00);
+            renderer.setPixelRatio( window.devicePixelRatio );
+            renderer.setSize( window.innerWidth, window.innerHeight );
+            document.body.appendChild( renderer.domElement );
+        }
+
+        var snake1HeadGeometry = new THREE.BoxGeometry(100, 100, 100);
+            var snake1BodyGeometry = new THREE.BoxGeometry(50, 50, 50);
+            var snake1Material = new THREE.MeshBasicMaterial({
+                color: 0xff0000,
+                wireframe: true,
+                wireframeLinewidth: 20
+            });
+            var snake1Head = new THREE.Mesh(snake1HeadGeometry, snake1Material);
+            snake1Head.position.x = -window.innerWidth * 11 / 12;
+            snake1Head.position.z = -3500;
+            scene.add(snake1Head);
+
+            var snake1Body = [];
+            var snake1BodyPos = -((window.innerWidth * 11 / 12) + 75);
+            for (var i = 0; i < 5; i += 1) {
+                snake1Body[i] = new THREE.Mesh(snake1BodyGeometry, snake1Material);
+                snake1Body[i].position.x = snake1BodyPos;
+                snake1Body[i].position.z = -3500;
+                snake1BodyPos -= 50;
+                console.log(snake1Body);
+            }
+
+            console.log(snake1Body);
+
+            for (var k = 0; k < 5; k += 1) {
+                console.log(snake1Body[k]);
+                scene.add(snake1Body[k]);
+            }
+
+        var snake1MoveUp = false;
+        var snake1MoveDown = false;
+        var snake1MoveRight = true;
+        var snake1MoveLeft = false;
+
+        function snake1KeyEvent (e) {
+            console.log(e);
+            if(e.keyCode === 87 && !snake1MoveDown) {
+                snake1MoveUp = true;
+                snake1MoveDown = false;
+                snake1MoveRight = false;
+                snake1MoveLeft = false;
+            } else if(e.keyCode === 83 && !snake1MoveUp) {
+                snake1MoveUp = false;
+                snake1MoveDown = true;
+                snake1MoveRight = false;
+                snake1MoveLeft = false;
+            } else if(e.keyCode === 68 && !snake1MoveLeft) {
+                snake1MoveUp = false;
+                snake1MoveDown = false;
+                snake1MoveRight = true;
+                snake1MoveLeft = false;
+            } else if(e.keyCode === 65 && !snake1MoveRight) {
+                snake1MoveUp = false;
+                snake1MoveDown = false;
+                snake1MoveRight = false;
+                snake1MoveLeft = true;
+            }
+        }
+        window.addEventListener('keydown', snake1KeyEvent);
+
+        function animate() {
+            requestAnimationFrame( animate );
+
+            if(snake1MoveUp) {
+                snake1Head.position.y += 5;
+                snake1Head.position.x += 0;
+                for (var j = 0; j < 5; j += 1) {
+                    console.log('works');
+                    if(snake1Head.position.x === snake1Body[j].position.x) {
+                    snake1Body[j].position.y += 5;
+                    snake1Body[j].position.x += 0;
+                    }
+                }
+            } else if(snake1MoveDown) {
+                snake1Head.position.y -= 5;
+                snake1Head.position.x += 0;
+            } else if(snake1MoveRight) {
+                snake1Head.position.x += 5;
+                snake1Head.position.y += 0;
+                for (var j = 0; j < 5; j += 1) {
+                    console.log('works');
+                    if(snake1Head.position.y - snake1Body[j].position.y === 0) {
+                    snake1Body[j].position.x += 5;
+                    snake1Body[j].position.y += 0;
+                    }
+                }
+            } else if(snake1MoveLeft) {
+                snake1Head.position.x -= 5;
+                snake1Head.position.y += 0;
+            }
+
+            // console.log(snake1Body);
+
+            // if(snake1Body[0].position.x === snake1Head.position.x && snake1MoveUp) {
+            //     snake1Body[0].position.y += 5;
+            //     snake1Body[0].position.x += 0;
+            // }
+
+            // snake1Body.forEach(snakePart => {
+            //     if(snakePart.position.x === snake1Head.position.x && snake1MoveUp) {
+            //         snakePart.position.y += 5;
+            //         snakePart.position.x += 0;
+            //     }
+            // })
+
+            // for (var m = 0; m < 5; m += 1) {
+            //     if(snake1Body[m].position.x === snake1Head.position.x && snake1MoveUp) {
+            //         snake1Body[m].position.y += 5;
+            //         snake1Body[m].position.x += 0;
+            //     }
+            // }
+
+            renderer.render(scene, camera);
+        }
+    </script>
+</body>
+</html>

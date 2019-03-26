@@ -11,13 +11,15 @@
     height: 240px;
     display: block;
 }
-
-#selectiondiv {
+ 
+#detailsdivmesh {
     position: fixed;
-    height: 50px;
-    width: 50px;
+    height: 300px;
+    width: 500px;
     display: block;
-    background-color: red;
+    opacity: .3;
+    font-style: white;
+    background-color: black;
 }
 
 #speedvalueinput {
