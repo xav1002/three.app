@@ -8,51 +8,22 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" media="screen" href="main.css">
 </head>
+    <style>
+    body { margin: 0; }
+    canvas { width: 100%; height: 100%; background-color: beige}
+    </style>
 <body>
-
-    <div id="optionsdiv">
-        <div class="list-group">
-                <button type="button" id="settingsbutton" class="list-group-item list-group-item-action">Settings</button>
-                <button type="button" id="cursortogglebutton" class="list-group-item list-group-item-action">Cursor: On</button>
-                <button type="button" id="statstogglebutton" class="list-group-item list-group-item-action">Stats: On</button>
-                <span>
-                    <input type="range" id="renderdistancevalueinput">
-                    <div>Change Render Distance</div>
-                </span>
-                <span>
-                    <input type="range" id="speedvalueinput">
-                    <div>Change Movement Speed</div>
-                </span>
-                <button type="button" id="optionsexitbutton" class="list-group-item list-group-item-action">Exit</button>
-              </div>
-</div>
-<div id="blocker">
-
-    <div id="instructions">
-        <span style="font-size:40px">Click</span>
-        <br />
-        (W, A, S, D = Move, SPACE = Move Up, SHIFT = Move Down, MOUSE = Look around, E = Options, ESC = Controls)
-    </div>
-
-</div>
-
-<Nav>hi</Nav>
-
-    <div class="cursor-vertical"></div>
-    <div class="cursor-horizontal"></div>
-
+    <div id="activate"></div>
     <script src="../three.js-master/build/three.js"></script>
-    <script src="../three.js-master/examples/js/controls/FirstPersonControls.js"></script>
+    <script src="..\three.js-master\examples\js\loaders\FBXLoader.js"></script>
+    <script src="..\three.js-master\examples\js\libs\inflate.min.js"></script>
+    <script src="app.js"></script>
     <script src="../three.js-master/examples/js/controls/PointerLockControls.js"></script>
-    <script src="..\three.js-master\examples\js\libs\stats.min.js"></script>
-
     <script>
-
-        const genome = new Array('hg19', [
-            new Array('chromosome1', 1234)
-        ])
-        console.log(genome);
-
+        document.addEventListener('DOMContentLoaded', function() {
+            const game = new Game();
+            window.game = game;
+        });
     </script>
 </body>
 </html>

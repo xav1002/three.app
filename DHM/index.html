@@ -87,6 +87,8 @@
 
     camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.1, 35000);
     controls = new THREE.PointerLockControls( camera );
+    console.log(camera);
+    console.log(controls);
 
     init();
     animate();
@@ -383,6 +385,7 @@
         direction.normalize(); // this ensures consistent movements in all directions
         if ( moveForward || moveBackward ) {
             velocity.z -= direction.z * 4000.0 * delta
+            console.log(velocity.z)
         };
         if ( moveLeft || moveRight ) {
             velocity.x -= direction.x * 4000.0 * delta

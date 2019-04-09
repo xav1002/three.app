@@ -11,6 +11,8 @@ class Game{
 			GAMEOVER: Symbol("gameover")
 		});
 		this.mode = this.modes.NONE;
+
+		console.log(this);
 		
 		this.container;
 		this.player = { };
@@ -47,7 +49,7 @@ class Game{
 		const sfxExt = SFX.supportsAudioType('mp3') ? 'mp3' : 'ogg';
         
 		const game = this;
-		this.anims = ["run", "gather-objects", "look-around"];
+		this.anims = ["girl-walk", "run", "gather-objects", "look-around"];
 		
 		this.assetsPath = '../assets/';
 		
