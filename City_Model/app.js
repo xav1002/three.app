@@ -1,21 +1,28 @@
 class Game{
     constructor(){
+
+        // 1. JS Classes V
+        // 2. Raycaster, environment interaction
+        // 3. Loading the environment
+        // 4. Menus
+        // 5. Cut scenes
+        // 6. Different layers of app
+        // 7. Cursor V
             this.scene = new THREE.Scene();
             this.camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 10000 );
             this.camera.position.y = 500;
-            console.log(this.camera, this.camera.position);
+            this.camera.position.z = 50;
 
             this.renderer = new THREE.WebGLRenderer();
             this.renderer.setSize( window.innerWidth, window.innerHeight );
             this.renderer.setClearColor('rgb(100, 100, 300)');
-            console.log(this.renderer);
             document.body.appendChild( this.renderer.domElement );
 
             const light = new THREE.PointLight( 0xffffff, 0.5 );
             light.position.set( 0, 20, 10 );
             const ambient = new THREE.AmbientLight( 0xffffff, 0.5 ); // soft white light
     
-            const cubeGeo = new THREE.BoxGeometry( 1, 1, 1 );
+            const cubeGeo = new THREE.BoxGeometry( 100, 100, 100 );
             const planeGeo = new THREE.PlaneGeometry( 50000, 50000, 100, 100 );
 
             const cubeMat = new THREE.MeshPhongMaterial( { color: 0x00aaff } );
@@ -28,17 +35,14 @@ class Game{
             this.plane.position.y = -100;
             this.plane.rotation.x = -90 * Math.PI / 180;
 
-            this.scene.add( this.cube );
-            this.scene.add(this.plane);
             this.scene.add( light );
             this.scene.add( ambient );
-
-            this.camera.position.z = 50;
+            this.scene.add( this.cube );
+            this.scene.add(this.plane);
 
             const game = this;
 
             const pathPrefix = './assets/';
-
             const hardLoad = ['Test_Building', 'Test_Building', 'Test_Building'];
 
             const options = {
@@ -48,13 +52,10 @@ class Game{
                     console.log('works');
                 }
             }
-
             hardLoad.forEach(obj => options.assets.push(`${pathPrefix}${obj}.fbx`));
 
             var i = 0;
-
             const objects = [];
-
             const loader = new THREE.FBXLoader();
             options.assets.forEach(asset => loader.load(asset, function(asset) {
                 console.log(asset);
@@ -77,28 +78,32 @@ class Game{
             this.moveUp = false;
             this.moveDown = false;
 
+            this.mouse = new THREE.Vector2();
+            this.raycaster = new THREE.Raycaster();
+
             this.controls = new THREE.PointerLockControls( this.camera );
             this.scene.add(this.controls.getObject());
+
+            this.cursorVert = document.querySelector('.cursor-vertical');
+            this.cursorHorizon = document.querySelector('.cursor-horizontal');
+            this.cursorVert.style.top = Number((window.innerHeight / 2) - 10) + 'px';
+            this.cursorVert.style.left = Number((window.innerWidth / 2) - 3/2) + 'px';
+            this.cursorHorizon.style.top = Number((window.innerHeight / 2) - 3/2) + 'px';
+            this.cursorHorizon.style.left = Number((window.innerWidth / 2) - 10) + 'px';
 
             this.activateDiv = document.querySelector('#activate');
             this.activateDiv.addEventListener('click', function() {
                 game.controls.lock();
+                game.activateDiv.style.display = 'none';
             });
+            this.controls.addEventListener('unlock', function() {
+                game.activateDiv.style.display = 'block';
+            })
 
             this.animate();
-
-            // for (var i = 0; i < meshNames.length; i += 1) {
-            //     console.log('works');
-            //     meshNames[i].position.z = -5000;
-            //     meshNames[i].position.x = 1000 * i;
-            //     game.scene.add(meshNames[i]);
-            // }
-
-            // const preloader = new Preloader(options);
         }
 
         init(objects) {
-            console.log('works');
             const game = this;
 
             console.log(objects);
@@ -120,9 +125,6 @@ class Game{
             testBuilding3.position.x = 3000;
             testBuilding3.position.y = -300;
             game.scene.add(testBuilding3);
-
-            console.log(game.controls);
-            console.log(game);
 
             window.addEventListener('keydown', function(e) {
                 switch ( e.keyCode ) {
@@ -191,25 +193,17 @@ class Game{
                         }
             });
 
-            // var controls = game.controls;
-
-        //     function onDocumentMouseMove(e) {
-        //         e.preventDefault();
-        //         mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
-        //         mouse.y = - (e.clientY / window.innerHeight) * 2 + 1;
-        //     }
-        //     window.addEventListener('mousemove', onDocumentMouseMove);
+            function onDocumentMouseMove(e) {
+                e.preventDefault();
+                game.mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+                game.mouse.y = - (e.clientY / window.innerHeight) * 2 + 1;
+            }
+            window.addEventListener('mousemove', onDocumentMouseMove);
         }
 
-        animate() {
+        moveCamera(delta) {
             const game = this;
-            // console.log(game.camera);
-            requestAnimationFrame( function(){ game.animate(); } );
-    
-            this.cube.rotation.x += 0.01;
-            this.cube.rotation.y += 0.01;
-            var time = performance.now();
-            var delta = ( time - game.prevTime ) / 1000;
+
             game.velocity.x -= game.velocity.x * 7.5 * delta;
             game.velocity.z -= game.velocity.z * 7.5 * delta;
             game.velocity.y -= game.velocity.y * 7.5 * delta;
@@ -221,7 +215,6 @@ class Game{
 
             if ( game.moveForward || game.moveBackward ) {
                 game.velocity.z -= game.direction.z * 4000 * delta;
-                console.log(game.velocity.z);
             };
             if ( game.moveLeft || game.moveRight ) {
                 game.velocity.x -= game.direction.x * 4000 * delta;
@@ -230,13 +223,43 @@ class Game{
                 game.velocity.y += game.direction.y * 4000 * delta;
             }
 
-            console.log();
+            game.raycaster.setFromCamera( game.mouse, game.camera );
+            let tooClose = false;
+
+            // console.log(game);
+            for(let obj of this.scene.children) {
+                const intersect = game.raycaster.intersectObject(obj);
+                if(intersect.length > 0) {
+                    if(intersect[0].distance < 10) {
+                        tooClose = true;
+                        break;
+                    }
+                }
+            }
 
             game.controls.getObject().translateX(game.velocity.x * delta);
             game.controls.getObject().translateY(game.velocity.y * delta);
-            game.controls.getObject().translateZ(game.velocity.z * delta);
 
-            // controls = game.controls;
+            if(!tooClose) {
+                game.controls.getObject().translateZ(game.velocity.z * delta);
+            }
+        }
+
+        animate() {
+            const game = this;
+
+            var time = performance.now();
+            var delta = ( time - game.prevTime ) / 1000;
+
+            requestAnimationFrame( function(){ game.animate(); } );
+    
+            this.cube.rotation.x += 0.01;
+            this.cube.rotation.y += 0.01;
+
+            // if(game.moveForward || game.moveBackward || game.moveLeft || game.moveRight || game.moveUp || game.moveDown) {
+                this.moveCamera(delta);
+            // }
+
             game.prevTime = time;
 
             this.renderer.render( this.scene, this.camera );
