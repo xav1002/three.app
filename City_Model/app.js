@@ -8,6 +8,7 @@ class Game{
         // 5. Cut scenes
         // 6. Different layers of app
         // 7. Cursor V
+
             this.scene = new THREE.Scene();
             this.camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 10000 );
             // const cameraObjectGeo = new THREE.BoxGeometry( 10, 10, 10 );
@@ -58,14 +59,16 @@ class Game{
                 }
             }
             visualAssetHardLoad.forEach(obj => options.assets.push(`${pathPrefix}${obj}.fbx`));
-            simplifiedAssetHardLoad.forEach(obj => options.assets.push(`${pathPrefix}${obj}.fbx`));
+            // simplifiedAssetHardLoad.forEach(obj => options.assets.push(`${pathPrefix}${obj}.fbx`));
 
             var i = 0;
             const objects = [];
+            this.physicalObj = [];
             const loader = new THREE.FBXLoader();
             options.assets.forEach(asset => loader.load(asset, function(asset) {
                 console.log(asset);
                 objects.push(asset);
+                game.physicalObj.push(asset.children[0]);
                 i += 1;
                 console.log('works');
                 if(i === options.assets.length) {
@@ -103,6 +106,18 @@ class Game{
             // this.cameraObject.position.z = this.controls.getObject().position.z;
             // this.scene.add(this.cameraObject);
 
+            this.displayLoading = document.createElement('div');
+            this.displayLoading.innerText = "Loading . . .";
+            this.displayLoading.style.fontSize = '40px';
+            this.displayLoading.style.width = '100%';
+            this.displayLoading.style.height = '50%';
+            this.displayLoading.style.display = 'block';
+            this.displayLoading.style.position = 'absolute';
+            this.displayLoading.style.color = 'white';
+            this.displayLoading.style.textAlign = 'center';
+            this.displayLoading.style.top = '50%';
+            document.body.appendChild(this.displayLoading);
+
             this.cursorVert = document.querySelector('.cursor-vertical');
             this.cursorHorizon = document.querySelector('.cursor-horizontal');
             this.cursorVert.style.top = Number((window.innerHeight / 2) - 10) + 'px';
@@ -114,16 +129,22 @@ class Game{
             this.activateDiv.addEventListener('click', function() {
                 game.controls.lock();
                 game.activateDiv.style.display = 'none';
+                game.cursorVert.style.display = 'block';
+                game.cursorHorizon.style.display = 'block';
             });
             this.controls.addEventListener('unlock', function() {
                 game.activateDiv.style.display = 'block';
-            })
+                game.cursorVert.style.display = 'none';
+                game.cursorHorizon.style.display = 'none';
+            });
 
-            this.animate();
         }
 
         init(objects) {
             const game = this;
+
+            document.body.removeChild(game.displayLoading);
+            game.activateDiv.style.display = 'block';
 
             console.log(game.controls.getObject(), game.controls.getObject().children[0], game.camera, game.scene);
 
@@ -147,11 +168,13 @@ class Game{
             testBuilding3.position.y = -300;
             game.scene.add(testBuilding3);
 
-            const simpleBuilding1 = objects[3];
-            simpleBuilding1.position.z = -5000;
-            simpleBuilding1.position.x = 0;
-            simpleBuilding1.position.y = -300;
-            game.scene.add(simpleBuilding1);
+            // const simpleBuilding1 = objects[3];
+            // simpleBuilding1.position.z = -5000;
+            // simpleBuilding1.position.x = -3000;
+            // simpleBuilding1.position.y = -300;
+            // game.scene.add(simpleBuilding1);
+
+            game.animate();
 
             window.addEventListener('keydown', function(e) {
                 switch ( e.keyCode ) {
@@ -224,6 +247,8 @@ class Game{
         moveCamera(delta) {
             const game = this;
 
+            // console.log(game.scene.children[7].children);
+
             game.velocity.x -= game.velocity.x * 7.5 * delta;
             game.velocity.z -= game.velocity.z * 7.5 * delta;
             game.velocity.y -= game.velocity.y * 7.5 * delta;
@@ -275,7 +300,7 @@ class Game{
             // console.log(directionFront);
             let raycasterFront = new THREE.Raycaster(position, directionFront);
 
-            for(let obj of this.scene.children) {
+            for(let obj of game.physicalObj) {
                 const intersect = raycasterFront.intersectObject(obj);
                 // console.log(intersect);
                 if(intersect.length > 0) {
