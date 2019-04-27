@@ -2,12 +2,17 @@ class Game{
     constructor(){
 
         // 1. JS Classes V
-        // 2. Raycaster, environment interaction
-        // 3. Loading the environment
+        // 2. Raycaster, environment interaction V
+        // 3. Loading the environment V
         // 4. Menus
         // 5. Cut scenes
         // 6. Different layers of app
         // 7. Cursor V
+        // Aframe
+        // hiC, BigWig tracks
+        // Scenes not constant, data driven, depends on type of data loaded
+        // Amt. of computation needs to be able to handle polygons of assets in scene: preserve framerate; prevent adding too many tracks
+            // If # polygons can't be decreased, increase computation; split computation from display
 
             this.scene = new THREE.Scene();
             this.camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 10000 );
@@ -48,8 +53,7 @@ class Game{
             const game = this;
 
             const pathPrefix = './assets/';
-            const visualAssetHardLoad = ['Test_Building', 'Test_Building', 'Test_Building'];
-            const simplifiedAssetHardLoad = ['Simplified_Building'];
+            const hardLoad = ['Wooden_Cabin'];
 
             const options = {
                 assets:[
@@ -58,17 +62,19 @@ class Game{
                     console.log('works');
                 }
             }
-            visualAssetHardLoad.forEach(obj => options.assets.push(`${pathPrefix}${obj}.fbx`));
-            // simplifiedAssetHardLoad.forEach(obj => options.assets.push(`${pathPrefix}${obj}.fbx`));
+            hardLoad.forEach(obj => options.assets.push(`${pathPrefix}${obj}.fbx`));
 
             var i = 0;
             const objects = [];
             this.physicalObj = [];
             const loader = new THREE.FBXLoader();
+
+            this.scene.children.forEach(child => game.physicalObj.push(child));
+
             options.assets.forEach(asset => loader.load(asset, function(asset) {
                 console.log(asset);
                 objects.push(asset);
-                game.physicalObj.push(asset.children[0]);
+                game.physicalObj.push(asset.children[1]);
                 i += 1;
                 console.log('works');
                 if(i === options.assets.length) {
@@ -87,24 +93,18 @@ class Game{
             this.moveUp = false;
             this.moveDown = false;
 
-            // this.mouse = new THREE.Vector2();
-            // this.raycasterFront = new THREE.Raycaster();
-            // this.raycasterLeft = new THREE.Raycaster();
-            // this.raycasterRight = new THREE.Raycaster();
-            // this.raycasterBack = new THREE.Raycaster();
-            // this.raycasterTop = new THREE.Raycaster();
-            // this.raycasterBottom = new THREE.Raycaster();
+            this.raycasterFront = new THREE.Raycaster();
+            this.raycasterLeft = new THREE.Raycaster();
+            this.raycasterRight = new THREE.Raycaster();
+            this.raycasterBack = new THREE.Raycaster();
+            this.raycasterUp = new THREE.Raycaster();
+            this.raycasterDown = new THREE.Raycaster();
 
             this.controls = new THREE.PointerLockControls( this.camera );
             this.controls.getObject().position.y = 500;
             this.controls.getObject().position.z = 50;
             // this.controls.getObject().children[0].matrixWorldNeedsUpdate = true;
             this.scene.add(this.controls.getObject());
-
-            // this.cameraObject.position.x = this.controls.getObject().position.x;
-            // this.cameraObject.position.y = this.controls.getObject().position.y;
-            // this.cameraObject.position.z = this.controls.getObject().position.z;
-            // this.scene.add(this.cameraObject);
 
             this.displayLoading = document.createElement('div');
             this.displayLoading.innerText = "Loading . . .";
@@ -156,17 +156,17 @@ class Game{
             testBuilding1.rotation.y = 0;
             game.scene.add(testBuilding1);
 
-            const testBuilding2 = objects[1];
-            testBuilding2.position.z = -5000;
-            testBuilding2.position.x = 0;
-            testBuilding2.position.y = -300;
-            game.scene.add(testBuilding2);
+            // const testBuilding2 = objects[1];
+            // testBuilding2.position.z = -5000;
+            // testBuilding2.position.x = 0;
+            // testBuilding2.position.y = -300;
+            // game.scene.add(testBuilding2);
 
-            const testBuilding3 = objects[2];
-            testBuilding3.position.z = -5000;
-            testBuilding3.position.x = 3000;
-            testBuilding3.position.y = -300;
-            game.scene.add(testBuilding3);
+            // const testBuilding3 = objects[2];
+            // testBuilding3.position.z = -5000;
+            // testBuilding3.position.x = 3000;
+            // testBuilding3.position.y = -300;
+            // game.scene.add(testBuilding3);
 
             // const simpleBuilding1 = objects[3];
             // simpleBuilding1.position.z = -5000;
@@ -182,7 +182,7 @@ class Game{
                     case 38: // up
                     case 87: // w
                             game.moveForward = true;
-                            console.log(game.moveForward);
+                            // console.log(game.moveForward);
                             break;
         
                     case 37: // left
@@ -272,19 +272,57 @@ class Game{
             let directionBack = new THREE.Vector3();
             game.controls.getObject().children[0].getWorldDirection(directionBack);
             let directionUp = new THREE.Vector3(0, 1, 0);
+            let directionDown = new THREE.Vector3(0, -1, 0);
+            const limitDistance = 60;
 
-            // Camera and controls object do not rotate as camera view rotates --> so use separate camera object to rotate raycasters?
-            // Or, find way to put out raycasters in many direcitons?
-            // Or, find way to make controls object or camera rotate with view?
+            // Up distance limit
+            let upTooClose = false;
+            game.raycasterUp.ray.origin = position;
+            game.raycasterUp.ray.direction = directionUp;
+            game.raycasterUp.far = limitDistance;
+
+            for(let obj of game.physicalObj) {
+                const intersect = game.raycasterUp.intersectObject(obj);
+                if(intersect.length > 0) {
+                    if(intersect[0].distance < limitDistance) {
+                        upTooClose = true;
+                        break;
+                    }
+                }
+            }
+            if(upTooClose && game.velocity.y > 0) {
+                game.velocity.y = 0;
+            }
+
+            // Down distance limit
+            let downTooClose = false;
+            game.raycasterDown.ray.origin = position;
+            game.raycasterDown.ray.direction = directionDown;
+            game.raycasterDown.far = limitDistance;
+
+            for(let obj of game.physicalObj) {
+                const intersect = game.raycasterDown.intersectObject(obj);
+                if(intersect.length > 0) {
+                    if(intersect[0].distance < limitDistance) {
+                        downTooClose = true;
+                        break;
+                    }
+                }
+            }
+            if(downTooClose && game.velocity.y < 0) {
+                game.velocity.y = 0;
+            }
 
             // Back distance limit
             let backTooClose = false;
-            let raycasterBack = new THREE.Raycaster(position, directionBack);
+            game.raycasterBack.ray.origin = position;
+            game.raycasterBack.ray.direction = directionBack;
+            game.raycasterBack.far = limitDistance;
 
-            for(let obj of this.scene.children) {
-                const intersect = raycasterBack.intersectObject(obj);
+            for(let obj of game.physicalObj) {
+                const intersect = game.raycasterBack.intersectObject(obj);
                 if(intersect.length > 0) {
-                    if(intersect[0].distance < 50) {
+                    if(intersect[0].distance < limitDistance) {
                         backTooClose = true;
                         break;
                     }
@@ -296,15 +334,15 @@ class Game{
 
             // Front distance limit
             let frontTooClose = false;
-            let directionFront = directionBack.applyAxisAngle(directionUp, Math.PI);
-            // console.log(directionFront);
-            let raycasterFront = new THREE.Raycaster(position, directionFront);
-
+            let directionFront = directionBack.clone();
+            directionFront.applyAxisAngle(directionUp, Math.PI);
+            game.raycasterFront.ray.origin = position;
+            game.raycasterFront.ray.direction = directionFront;
+            game.raycasterFront.far = limitDistance;
             for(let obj of game.physicalObj) {
-                const intersect = raycasterFront.intersectObject(obj);
-                // console.log(intersect);
+                const intersect = game.raycasterFront.intersectObject(obj);
                 if(intersect.length > 0) {
-                    if(intersect[0].distance < 50) {
+                    if(intersect[0].distance < limitDistance) {
                         frontTooClose = true;
                         break;
                     }
@@ -316,51 +354,50 @@ class Game{
 
             // Right distance limit
             let rightTooClose = false;
-            let directionRight = directionBack.applyAxisAngle(directionUp, - Math.PI / 2);
-            let raycasterRight = new THREE.Raycaster(position, directionRight);
+            let directionRight = directionBack.clone();
+            directionRight.applyAxisAngle(directionUp, - Math.PI / 2);
+            game.raycasterRight.ray.origin = position;
+            game.raycasterRight.ray.direction = directionRight;
+            game.raycasterRight.far = limitDistance;
 
-            for(let obj of this.scene.children) {
-                const intersect = raycasterRight.intersectObject(obj);
+            for(let obj of game.physicalObj) {
+                const intersect = game.raycasterRight.intersectObject(obj);
                 if(intersect.length > 0) {
-                    if(intersect[0].distance < 50) {
+                    if(intersect[0].distance < limitDistance) {
                         rightTooClose = true;
                         break;
                     }
                 }
             }
-            if(rightTooClose && game.velocity.x > 0) {
+            if(rightTooClose && game.velocity.x < 0) {
                 game.velocity.x = 0;
             }
 
             // Left distance limit
             let leftTooClose = false;
-            let directionLeft = directionBack.applyAxisAngle(directionUp, Math.PI / 2);
-            let raycasterLeft = new THREE.Raycaster(position, directionLeft);
+            let directionLeft = directionBack.clone();
+            directionLeft.applyAxisAngle(directionUp, (Math.PI / 2));
+            game.raycasterLeft.ray.origin = position;
+            game.raycasterLeft.ray.direction = directionLeft;
+            game.raycasterLeft.far = limitDistance;
 
-            for(let obj of this.scene.children) {
-                const intersect = raycasterLeft.intersectObject(obj);
+            for(let obj of game.physicalObj) {
+                const intersect = game.raycasterLeft.intersectObject(obj);
                 if(intersect.length > 0) {
-                    if(intersect[0].distance < 50) {
+                    if(intersect[0].distance < limitDistance) {
                         leftTooClose = true;
                         break;
                     }
                 }
             }
-            if(leftTooClose && game.velocity.x < 0) {
+            if(leftTooClose && game.velocity.x > 0) {
                 game.velocity.x = 0;
             }
-
-            // console.log(raycasterFront, raycasterBack, raycasterLeft, raycasterRight);
 
             game.controls.getObject().translateX(game.velocity.x * delta);
             game.controls.getObject().translateY(game.velocity.y * delta);
             game.controls.getObject().translateZ(game.velocity.z * delta);
 
-        //     game.cameraObject.position.x = game.controls.getObject().position.x;
-        //     game.cameraObject.position.y = game.controls.getObject().position.y;
-        //     game.cameraObject.position.z = game.controls.getObject().position.z;
-
-        //     game.cameraObject.rotation.y = 6;
         }
 
         animate() {
