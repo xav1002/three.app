@@ -16,11 +16,6 @@ class Game{
 
             this.scene = new THREE.Scene();
             this.camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 10000 );
-            // const cameraObjectGeo = new THREE.BoxGeometry( 10, 10, 10 );
-            // const cameraObjectMat = new THREE.MeshPhongMaterial({ wireframe: true });
-            // this.cameraObject = new THREE.Mesh(cameraObjectGeo, cameraObjectMat);
-            // this.camera.position.y = 500;
-            // this.camera.position.z = 50;
 
             this.renderer = new THREE.WebGLRenderer();
             this.renderer.setSize( window.innerWidth, window.innerHeight );
@@ -42,7 +37,7 @@ class Game{
             this.cube.position.z = -2000;
 
             this.plane = new THREE.Mesh( planeGeo, planeMat );
-            this.plane.position.y = -100;
+            this.plane.position.y = 0;
             this.plane.rotation.x = -90 * Math.PI / 180;
 
             this.scene.add( light );
@@ -74,7 +69,7 @@ class Game{
             options.assets.forEach(asset => loader.load(asset, function(asset) {
                 console.log(asset);
                 objects.push(asset);
-                game.physicalObj.push(asset.children[1]);
+                asset.children.forEach(child => game.physicalObj.push(child));
                 i += 1;
                 console.log('works');
                 if(i === options.assets.length) {
@@ -101,7 +96,7 @@ class Game{
             this.raycasterDown = new THREE.Raycaster();
 
             this.controls = new THREE.PointerLockControls( this.camera );
-            this.controls.getObject().position.y = 500;
+            this.controls.getObject().position.y = 100;
             this.controls.getObject().position.z = 50;
             // this.controls.getObject().children[0].matrixWorldNeedsUpdate = true;
             this.scene.add(this.controls.getObject());
@@ -149,12 +144,11 @@ class Game{
             console.log(game.controls.getObject(), game.controls.getObject().children[0], game.camera, game.scene);
 
             console.log(objects);
-            const testBuilding1 = objects[0];
-            testBuilding1.position.z = -5000;
-            testBuilding1.position.x = -3000;
-            testBuilding1.position.y = -300;
-            testBuilding1.rotation.y = 0;
-            game.scene.add(testBuilding1);
+            const woodenCabin = objects[0];
+            woodenCabin.position.z = -1000;
+            woodenCabin.position.x = 0;
+            woodenCabin.position.y = -200;
+            game.scene.add(woodenCabin);
 
             // const testBuilding2 = objects[1];
             // testBuilding2.position.z = -5000;
@@ -303,7 +297,7 @@ class Game{
             for(let obj of game.physicalObj) {
                 const intersect = game.raycasterDown.intersectObject(obj);
                 if(intersect.length > 0) {
-                    if(intersect[0].distance < limitDistance) {
+                    if(intersect[0].distance < 100) {
                         downTooClose = true;
                         break;
                     }
