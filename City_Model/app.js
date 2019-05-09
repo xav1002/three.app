@@ -14,7 +14,7 @@ class Game{
         // Amt. of computation needs to be able to handle polygons of assets in scene: preserve framerate; prevent adding too many tracks
             // If # polygons can't be decreased, increase computation; split computation from display
 
-            this.scene = new THREE.Scene();
+            this.scene = document.querySelector('#appscene').object3D;
             this.camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 10000 );
 
             this.renderer = new THREE.WebGLRenderer();
@@ -70,6 +70,7 @@ class Game{
                 console.log(asset);
                 objects.push(asset);
                 asset.children.forEach(child => game.physicalObj.push(child));
+                // create div of info for each item
                 i += 1;
                 console.log('works');
                 if(i === options.assets.length) {
@@ -88,17 +89,22 @@ class Game{
             this.moveUp = false;
             this.moveDown = false;
 
+            this.directionBack = new THREE.Vector3();
+            this.directionUp = new THREE.Vector3(0, 1, 0);
+            this.directionDown = new THREE.Vector3(0, -1, 0);
+            this.interactionDirectionBack = new THREE.Vector3();
+
             this.raycasterFront = new THREE.Raycaster();
             this.raycasterLeft = new THREE.Raycaster();
             this.raycasterRight = new THREE.Raycaster();
             this.raycasterBack = new THREE.Raycaster();
             this.raycasterUp = new THREE.Raycaster();
             this.raycasterDown = new THREE.Raycaster();
+            this.interactionRaycaster = new THREE.Raycaster();
 
             this.controls = new THREE.PointerLockControls( this.camera );
             this.controls.getObject().position.y = 100;
             this.controls.getObject().position.z = 50;
-            // this.controls.getObject().children[0].matrixWorldNeedsUpdate = true;
             this.scene.add(this.controls.getObject());
 
             this.displayLoading = document.createElement('div');
@@ -263,16 +269,13 @@ class Game{
             }
 
             let position = game.controls.getObject().position.clone();
-            let directionBack = new THREE.Vector3();
-            game.controls.getObject().children[0].getWorldDirection(directionBack);
-            let directionUp = new THREE.Vector3(0, 1, 0);
-            let directionDown = new THREE.Vector3(0, -1, 0);
+            game.controls.getObject().children[0].getWorldDirection(game.directionBack);
             const limitDistance = 60;
 
             // Up distance limit
             let upTooClose = false;
             game.raycasterUp.ray.origin = position;
-            game.raycasterUp.ray.direction = directionUp;
+            game.raycasterUp.ray.direction = game.directionUp;
             game.raycasterUp.far = limitDistance;
 
             for(let obj of game.physicalObj) {
@@ -291,7 +294,7 @@ class Game{
             // Down distance limit
             let downTooClose = false;
             game.raycasterDown.ray.origin = position;
-            game.raycasterDown.ray.direction = directionDown;
+            game.raycasterDown.ray.direction = game.directionDown;
             game.raycasterDown.far = limitDistance;
 
             for(let obj of game.physicalObj) {
@@ -310,7 +313,7 @@ class Game{
             // Back distance limit
             let backTooClose = false;
             game.raycasterBack.ray.origin = position;
-            game.raycasterBack.ray.direction = directionBack;
+            game.raycasterBack.ray.direction = game.directionBack;
             game.raycasterBack.far = limitDistance;
 
             for(let obj of game.physicalObj) {
@@ -328,8 +331,8 @@ class Game{
 
             // Front distance limit
             let frontTooClose = false;
-            let directionFront = directionBack.clone();
-            directionFront.applyAxisAngle(directionUp, Math.PI);
+            let directionFront = game.directionBack.clone();
+            directionFront.applyAxisAngle(game.directionUp, Math.PI);
             game.raycasterFront.ray.origin = position;
             game.raycasterFront.ray.direction = directionFront;
             game.raycasterFront.far = limitDistance;
@@ -348,8 +351,8 @@ class Game{
 
             // Right distance limit
             let rightTooClose = false;
-            let directionRight = directionBack.clone();
-            directionRight.applyAxisAngle(directionUp, - Math.PI / 2);
+            let directionRight = game.directionBack.clone();
+            directionRight.applyAxisAngle(game.directionUp, - Math.PI / 2);
             game.raycasterRight.ray.origin = position;
             game.raycasterRight.ray.direction = directionRight;
             game.raycasterRight.far = limitDistance;
@@ -369,8 +372,8 @@ class Game{
 
             // Left distance limit
             let leftTooClose = false;
-            let directionLeft = directionBack.clone();
-            directionLeft.applyAxisAngle(directionUp, (Math.PI / 2));
+            let directionLeft = game.directionBack.clone();
+            directionLeft.applyAxisAngle(game.directionUp, (Math.PI / 2));
             game.raycasterLeft.ray.origin = position;
             game.raycasterLeft.ray.direction = directionLeft;
             game.raycasterLeft.far = limitDistance;
@@ -394,6 +397,31 @@ class Game{
 
         }
 
+        objectInteraction() {
+            game = this;
+
+            game.controls.getObject().getWorldDirection(game.interactionDirectionBack);
+            let interactionDirectionFront = game.interactionDirectionBack.clone();
+            interactionDirectionFront.applyAxisAngle(game.directionUp, Math.PI);
+
+            game.interactionRaycaster.ray.origin = game.controls.getObject().position.clone();
+            game.interactionRaycaster.ray.direction = interactionDirectionFront;
+
+            let intersects = game.interactionRaycaster.intersectObjects(game.physicalObj);
+
+            var isIntersecting;
+
+            if(intersects.length > 0) {
+                isIntersecting = true;
+            } else if(intersects.length <= 0) {
+                isIntersecting = false;
+            }
+
+            if(isIntersecting) {
+                // console.log(intersects[0].object);
+            }
+        }
+
         animate() {
             const game = this;
 
@@ -406,6 +434,7 @@ class Game{
             // this.cube.rotation.y += 0.01;
 
             this.moveCamera(delta);
+            this.objectInteraction();
 
             game.prevTime = time;
 
@@ -414,116 +443,3 @@ class Game{
 
 
     }
-
-// class Preloader{
-//     constructor(options) {
-//             this.assets = {};
-//             for(let asset of options.assets ){
-//                 this.assets[asset] = { loaded: 0, complete: false };
-//                 this.load(asset);
-//             }
-//             console.log(this.assets);
-
-//             this.container = options.container;
-		
-// 		if (options.onprogress==undefined){
-// 			this.onprogress = onprogress;
-// 			this.domElement = document.createElement("div");
-// 			this.domElement.style.position = 'absolute';
-// 			this.domElement.style.top = '0';
-// 			this.domElement.style.left = '0';
-// 			this.domElement.style.width = '100%';
-// 			this.domElement.style.height = '100%';
-// 			this.domElement.style.background = '#000';
-// 			this.domElement.style.opacity = '0.7';
-// 			this.domElement.style.display = 'flex';
-// 			this.domElement.style.alignItems = 'center';
-// 			this.domElement.style.justifyContent = 'center';
-// 			this.domElement.style.zIndex = '1111';
-// 			const barBase = document.createElement("div");
-// 			barBase.style.background = '#aaa';
-// 			barBase.style.width = '50%';
-// 			barBase.style.minWidth = '250px';
-// 			barBase.style.borderRadius = '10px';
-// 			barBase.style.height = '15px';
-// 			this.domElement.appendChild(barBase);
-// 			const bar = document.createElement("div");
-// 			bar.style.background = '#2a2';
-// 			bar.style.width = '50%';
-// 			bar.style.borderRadius = '10px';
-// 			bar.style.height = '100%';
-// 			bar.style.width = '0';
-// 			barBase.appendChild(bar);
-// 			this.progressBar = bar;
-// 			if (this.container!=undefined){
-// 				this.container.appendChild(this.domElement);
-// 			}else{
-// 				document.body.appendChild(this.domElement);
-// 			}
-// 		}else{
-// 			this.onprogress = options.onprogress;
-// 		}
-		
-// 		this.oncomplete = options.oncomplete;
-		
-// 		const loader = this;
-// 		function onprogress(delta){
-// 			const progress = delta*100;
-// 			loader.progressBar.style.width = `${progress}%`;
-// 		}
-// 	}
-	
-// 	checkCompleted(){
-// 		for(let prop in this.assets){
-// 			const asset = this.assets[prop];
-// 			if (!asset.complete) return false;
-// 		}
-// 		return true;
-// 	}
-	
-// 	get progress(){
-// 		let total = 0;
-// 		let loaded = 0;
-		
-// 		for(let prop in this.assets){
-// 			const asset = this.assets[prop];
-// 			if (asset.total == undefined){
-// 				loaded = 0;
-// 				break;
-// 			}
-// 			loaded += asset.loaded; 
-// 			total += asset.total;
-// 		}
-		
-// 		return loaded/total;
-// 	}
-	
-// 	load(url){
-// 		const loader = this;
-// 		var xobj = new XMLHttpRequest();
-// 		xobj.overrideMimeType("application/json");
-// 		xobj.open('GET', url, true); 
-// 		xobj.onreadystatechange = function () {
-// 			  if (xobj.readyState == 4 && xobj.status == "200") {
-// 				  loader.assets[url].complete = true;
-// 				  if (loader.checkCompleted()){
-// 					  if (loader.domElement!=undefined){
-// 						  if (loader.container!=undefined){
-// 							  loader.container.removeChild(loader.domElement);
-// 						  }else{
-// 							  document.body.removeChild(loader.domElement);
-// 						  }
-// 					  }
-// 					  loader.oncomplete();	
-// 				  }
-// 			  }
-// 		};
-// 		xobj.onprogress = function(e){
-// 			const asset = loader.assets[url];
-// 			asset.loaded = e.loaded;
-// 			asset.total = e.total;
-// 			loader.onprogress(loader.progress);
-// 		}
-// 		xobj.send(null);
-// 	}
-//     }
