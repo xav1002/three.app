@@ -12,8 +12,8 @@ cabin.setAttribute('obj-model', {
     mtl: '#woodencabinmtl'
 });
 // cabin.setAttribute('modify-cabin', true);
-cabin.setAttribute('scale', '0.1 0.1 0.1');
-cabin.setAttribute('position', '10 0 20');
+cabin.setAttribute('scale', '.05 .05 .05');
+cabin.setAttribute('position', '0 0 -10');
 console.log(cabin);
 scene.appendChild(cabin);
 
