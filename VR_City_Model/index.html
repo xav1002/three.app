@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+    <head>
+            <meta charset="utf-8">
+            <meta http-equiv="X-UA-Compatible" content="IE=edge">
+            <title>VR City Model</title>
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <link rel="stylesheet" type="text/css" media="screen" href="main.css">
+            <script src="/aframe/aframe.min.js"></script>
+    </head>
+    <body>
+        <!-- <script src="../three.js-master/build/three.js"></script> -->
+        <script src="..\three.js-master\examples\js\loaders\FBXLoader.js"></script>
+        <script src="..\three.js-master\examples\js\libs\inflate.min.js"></script>
+        <script src="components.js"></script>
+
+        <a-scene>
+            <assets>
+                <img id="grasstexture" src="/City_Model/assets/grassTexture.jpg">
+                <!-- <img id="wood" src="./City_Model/assets/WoodCabinDif.jpg"> -->
+                <a-asset-item id="woodencabinobj" src="assets/Wooden_Cabin.obj"></a-asset-item>
+                <a-asset-item id="woodencabinmtl" src="assets/Wooden_Cabin.mtl"></a-asset-item>
+            </assets>
+        </a-scene>
+
+        <script src="app.js"></script>
+    </body>
+</html>

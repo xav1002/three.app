@@ -37,3 +37,9 @@
     background-color: gray;
     display: none;
 }
+
+#menu {
+    background-color: white;
+    display: none;
+    position: absolute;
+}

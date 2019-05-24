@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Page Title</title>
+    <title>City Model</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="https://aframe.io/releases/0.9.1/aframe.min.js"></script>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
@@ -15,8 +15,6 @@
     </style>
 <body>
 
-    <a-scene id="appscene"></a-scene>
-
     <div id="activate">Click to Start; WASD/Arrow Keys, Space = Up, Shift = Down</div>
 
     <div class="cursor-vertical"></div>
@@ -26,17 +24,12 @@
     <script src="..\three.js-master\examples\js\loaders\FBXLoader.js"></script>
     <script src="..\three.js-master\examples\js\libs\inflate.min.js"></script>
     <script src="app.js"></script>
+    <script src="2DOps.js"></script>
     <script src="../three.js-master/examples/js/controls/PointerLockControls.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             var game = new Game();
             window.game = game;
-            AFRAME.registerComponent('game', {
-                init: function() {
-                    console.log('works');
-                    var VRGame = game;
-                }
-            });
         });
     </script>
 </body>

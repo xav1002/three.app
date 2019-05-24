@@ -1,147 +1,18 @@
 class Game{
     constructor(){
 
-        // 1. JS Classes V
-        // 2. Raycaster, environment interaction V
-        // 3. Loading the environment V
-        // 4. Menus
-        // 5. Cut scenes
-        // 6. Different layers of app
-        // 7. Cursor V
-        // Aframe
-        // hiC, BigWig tracks
-        // Scenes not constant, data driven, depends on type of data loaded
-        // Amt. of computation needs to be able to handle polygons of assets in scene: preserve framerate; prevent adding too many tracks
-            // If # polygons can't be decreased, increase computation; split computation from display
+            this.scene = document.querySelector('#appscene').object3D;
 
-            this.scene = new THREE.Scene();
-            this.camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 10000 );
-
-            this.renderer = new THREE.WebGLRenderer();
-            this.renderer.setSize( window.innerWidth, window.innerHeight );
-            this.renderer.setClearColor('rgb(100, 100, 300)');
-            document.body.appendChild( this.renderer.domElement );
-
-            const light = new THREE.PointLight( 0xffffff, 0.5 );
-            light.position.set( 0, 20, 10 );
-            const ambient = new THREE.AmbientLight( 0xffffff, 0.5 ); // soft white light
-    
-            const cubeGeo = new THREE.BoxGeometry( 100, 100, 100 );
             const planeGeo = new THREE.PlaneGeometry( 50000, 50000, 100, 100 );
+            const planeMat = new THREE.MeshPhongMaterial( { color: 'rgb(100, 300, 100)' });
 
-            const grassTexture = THREE.ImageUtils.loadTexture('./assets/grassTexture.jpg');
+            // AFRAME.registerComponent('plane', {
+            //     init: function() {
+            //         this.el.setObject3D('plane', new THREE.Mesh(planeGeo, planeMat));
+            //     }
+            // });
 
-            const cubeMat = new THREE.MeshPhongMaterial( { color: 0x00aaff } );
-            const planeMat = new THREE.MeshPhongMaterial( { map: grassTexture });
-
-            this.cube = new THREE.Mesh( cubeGeo, cubeMat );
-            this.cube.position.y = 500;
-            this.cube.position.z = -2000;
-
-            this.plane = new THREE.Mesh( planeGeo, planeMat );
-            this.plane.position.y = 0;
-            this.plane.rotation.x = -90 * Math.PI / 180;
-
-            this.scene.add( light );
-            this.scene.add( ambient );
-            this.scene.add( this.cube );
-            this.scene.add(this.plane);
-
-            const game = this;
-
-            const pathPrefix = './assets/';
-            const hardLoad = ['Wooden_Cabin', 'flag'];
-
-            const options = {
-                assets:[
-                ],
-                oncomplete: function() {
-                    console.log('works');
-                }
-            }
-            hardLoad.forEach(obj => options.assets.push(`${pathPrefix}${obj}.fbx`));
-
-            var i = 0;
-            const objects = [];
-            this.physicalObj = [];
-            const loader = new THREE.FBXLoader();
-
-            this.scene.children.forEach(child => game.physicalObj.push(child));
-
-            options.assets.forEach(asset => loader.load(asset, function(asset) {
-                console.log(asset);
-                objects.push(asset);
-                asset.children.forEach(child => game.physicalObj.push(child));
-                // create div of info for each item
-                i += 1;
-                console.log('works');
-                if(i === options.assets.length) {
-                    game.init(objects);
-                }
-            }));
-
-            this.prevTime = performance.now();
-            this.velocity = new THREE.Vector3();
-            this.direction = new THREE.Vector3();
-
-            this.moveForward = false;
-            this.moveBackward = false;
-            this.moveLeft = false;
-            this.moveRight = false;
-            this.moveUp = false;
-            this.moveDown = false;
-
-            this.directionBack = new THREE.Vector3();
-            this.directionUp = new THREE.Vector3(0, 1, 0);
-            this.directionDown = new THREE.Vector3(0, -1, 0);
-            this.interactionDirectionBack = new THREE.Vector3();
-
-            this.raycasterFront = new THREE.Raycaster();
-            this.raycasterLeft = new THREE.Raycaster();
-            this.raycasterRight = new THREE.Raycaster();
-            this.raycasterBack = new THREE.Raycaster();
-            this.raycasterUp = new THREE.Raycaster();
-            this.raycasterDown = new THREE.Raycaster();
-            this.interactionRaycaster = new THREE.Raycaster();
-
-            this.controls = new THREE.PointerLockControls( this.camera );
-            this.controls.getObject().position.y = 100;
-            this.controls.getObject().position.z = 50;
-            this.scene.add(this.controls.getObject());
-
-            this.displayLoading = document.createElement('div');
-            this.displayLoading.innerText = "Loading . . .";
-            this.displayLoading.style.fontSize = '40px';
-            this.displayLoading.style.width = '100%';
-            this.displayLoading.style.height = '50%';
-            this.displayLoading.style.display = 'block';
-            this.displayLoading.style.position = 'absolute';
-            this.displayLoading.style.color = 'white';
-            this.displayLoading.style.textAlign = 'center';
-            this.displayLoading.style.top = '50%';
-            document.body.appendChild(this.displayLoading);
-
-            this.cursorVert = document.querySelector('.cursor-vertical');
-            this.cursorHorizon = document.querySelector('.cursor-horizontal');
-            this.cursorVert.style.top = Number((window.innerHeight / 2) - 10) + 'px';
-            this.cursorVert.style.left = Number((window.innerWidth / 2) - 3/2) + 'px';
-            this.cursorHorizon.style.top = Number((window.innerHeight / 2) - 3/2) + 'px';
-            this.cursorHorizon.style.left = Number((window.innerWidth / 2) - 10) + 'px';
-
-            this.activateDiv = document.querySelector('#activate');
-            this.activateDiv.addEventListener('click', function() {
-                game.controls.lock();
-                game.activateDiv.style.display = 'none';
-                game.cursorVert.style.display = 'block';
-                game.cursorHorizon.style.display = 'block';
-            });
-            this.controls.addEventListener('unlock', function() {
-                game.activateDiv.style.display = 'block';
-                game.cursorVert.style.display = 'none';
-                game.cursorHorizon.style.display = 'none';
-            });
-
-            // module.exports = this.controls;
+            // this.scene.add(plane);
 
         }
 
@@ -154,17 +25,11 @@ class Game{
             console.log(game.controls.getObject(), game.controls.getObject().children[0], game.camera, game.scene);
 
             console.log(objects);
-            const woodenCabin = objects[1];
+            const woodenCabin = objects[0];
             woodenCabin.position.z = -1000;
             woodenCabin.position.x = 0;
             woodenCabin.position.y = -200;
             game.scene.add(woodenCabin);
-
-            const flag = objects[0];
-            flag.position.z = -300;
-            flag.position.x = 200;
-            flag.position.y = -100;
-            game.scene.add(flag);
 
             // const testBuilding2 = objects[1];
             // testBuilding2.position.z = -5000;

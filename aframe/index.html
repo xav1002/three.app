@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>aframe</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" media="screen" href="main.css">
+    <script src=aframe.min.js></script>
+    <script src="components.js"></script>
+</head>
+<body>
+
+    <a-scene>
+
+        <assets>
+            <img id="pic" src="assets/courtPic.jpg">
+            <img id="bball" src="assets/bball.jpg">
+            <img id="background" src="assets/courtsurroundings.jpg">
+        </assets>
+        <a-camera look-controls wasd-controls></a-camera>
+
+        <a-entity id="sphere" position="0 0 -10" sphere></a-entity>
+
+        <a-entity id="plane" position="0 -50 -100" rotation="-90 0 0" plane></a-entity>
+
+        <a-sky material="src: #background"></a-sky>
+
+
+    </a-scene>
+
+    <script>
+    console.log(document.querySelector('#sphere'));
+    </script>
+</body>
+</html>
