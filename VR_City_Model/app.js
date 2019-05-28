@@ -1,8 +1,13 @@
 const scene = document.querySelector('a-scene');
 
 var camera = document.createElement('a-camera');
-camera.setAttribute('look-controls', true);
-camera.setAttribute('wasd-controls', true);
+camera.setAttribute('look-controls', {
+    enabled: 'true'
+});
+camera.setAttribute('wasd-controls', {
+    enabled: 'true',
+    fly: 'true',
+});
 
 var cabin = document.createElement('a-entity');
 console.log(cabin);
