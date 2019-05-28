@@ -8,6 +8,7 @@ class Game{
         // 5. Cut scenes
         // 6. Different layers of app
         // 7. Cursor V
+        // 8. Learn Animations
         // Aframe
         // hiC, BigWig tracks
         // Scenes not constant, data driven, depends on type of data loaded

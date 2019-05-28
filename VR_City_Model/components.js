@@ -6,13 +6,13 @@ AFRAME.registerComponent('red', {
     }
 });
 
-AFRAME.registerComponent('box', {
+AFRAME.registerComponent('red-cube', {
     init: function() {
         this.el.setAttribute('geometry', {
             primitive: 'box',
-            width: '5',
-            height: '5',
-            depth: '5'
+            width: '10',
+            height: '10',
+            depth: '10'
         })
         this.el.setAttribute('material', {
             color: 'red'
@@ -35,16 +35,11 @@ AFRAME.registerComponent('ground', {
     }
 })
 
-AFRAME.registerComponent('modify-cabin', {
+AFRAME.registerComponent('cabin', {
     init: function() {
-        this.el.addEventListener('model-loaded', () => {
-            const obj = this.el.getObject3D('mesh');
-            obj.traverse(node => {
-                node.children.forEach(child => {
-                    child.material.color.set('red');
-                });
-                node.position.set('10 0 20');
-                })
-            })
-        }
+        this.el.setAttribute('obj-model', {
+            obj: '#woodencabinobj',
+            mtl: '#woodencabinmtl'
+        });
+    }
 })

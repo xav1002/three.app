@@ -10,5 +10,5 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 1
-map_Bump -bm 0.350042 WoodCabinNM.jpg
-map_Kd WoodCabinDif.jpg
+map_Bump -bm 0.350042 C:\\Users\\orchd\\Three.js\\City_Model\\assets\\WoodCabinNM.jpg
+map_Kd C:\\Users\\orchd\\Three.js\\City_Model\\assets\\WoodCabinDif.jpg
