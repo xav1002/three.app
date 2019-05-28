@@ -37,16 +37,14 @@ AFRAME.registerComponent('ground', {
 
 AFRAME.registerComponent('modify-cabin', {
     init: function() {
-            const obj = [];
-            obj.push(this.el.getObject3D('mesh'));
-            obj.forEach(node => {
-                node.setAttribute('material', {
-                    color: 'red'
-                })
-                node.setAttribute('position', '10 0 20');
-                node.setAttribute('geometry', {
-                    primitive: 'box'
+        this.el.addEventListener('model-loaded', () => {
+            const obj = this.el.getObject3D('mesh');
+            obj.traverse(node => {
+                node.children.forEach(child => {
+                    child.material.color.set('red');
+                });
+                node.position.set('10 0 20');
                 })
             })
-    }
+        }
 })

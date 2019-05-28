@@ -11,10 +11,10 @@ cabin.setAttribute('obj-model', {
     obj: '#woodencabinobj',
     mtl: '#woodencabinmtl'
 });
-// cabin.setAttribute('modify-cabin', true);
-cabin.setAttribute('scale', '.05 .05 .05');
-cabin.setAttribute('position', '0 0 -10');
 console.log(cabin);
+// cabin.setAttribute('modify-cabin', true);
+cabin.setAttribute('scale', '1 1 1');
+cabin.setAttribute('position', '0 0 -10');
 scene.appendChild(cabin);
 
 var ground = document.createElement('a-entity');
