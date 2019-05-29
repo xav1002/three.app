@@ -1,13 +1,6 @@
 const scene = document.querySelector('a-scene');
 
-var camera = document.createElement('a-camera');
-camera.setAttribute('look-controls', {
-    enabled: 'true'
-});
-camera.setAttribute('wasd-controls', {
-    enabled: 'true',
-    fly: 'true',
-});
+const camera = document.querySelector('#camera');
 
 var cabin = document.createElement('a-entity');
 console.log(cabin);
@@ -33,24 +26,13 @@ window.addEventListener('click', function() {
         easing: 'linear',
         loop: 'true'
     });
-    cube.setAttribute('animation__1', {
+    cube.setAttribute('animation', {
         property: 'components.material.material.color',
         type: 'color',
         from: 'red',
         to: 'green',
         dur: '5000',
-        startEvents: 'animationcomplete__'
     });
-    cube.setAttribute('animation__2', {
-        property: 'components.material.material.color',
-        type: 'color',
-        from: 'green',
-        to: 'red',
-        dur: '5000',
-        startEvents: 'animationcomplete',
-        id: 'animation__2'
-    })
-})
+});
 
 console.log(scene);
-console.log(camera);
