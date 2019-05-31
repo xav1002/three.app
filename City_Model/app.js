@@ -65,11 +65,11 @@ class Game{
             var i = 0;
             const objects = [];
             this.physicalObj = [];
-            const loader = new THREE.FBXLoader();
+            this.loader = new THREE.FBXLoader();
 
             this.scene.children.forEach(child => game.physicalObj.push(child));
 
-            options.assets.forEach(asset => loader.load(asset, function(asset) {
+            options.assets.forEach(asset => game.loader.load(asset, function(asset) {
                 console.log(asset);
                 objects.push(asset);
                 asset.children.forEach(child => game.physicalObj.push(child));
@@ -142,7 +142,7 @@ class Game{
                 game.cursorHorizon.style.display = 'none';
             });
 
-            // module.exports = this.controls;
+            this.player = {};
 
         }
 
@@ -167,23 +167,23 @@ class Game{
             flag.position.y = -100;
             game.scene.add(flag);
 
-            // const testBuilding2 = objects[1];
-            // testBuilding2.position.z = -5000;
-            // testBuilding2.position.x = 0;
-            // testBuilding2.position.y = -300;
-            // game.scene.add(testBuilding2);
+            game.loader.load('assets/Walking.fbx', function(obj) {
+                obj.mixer = new THREE.AnimationMixer( obj );
+                game.player.mixer = obj.mixer;
+                game.player.root = obj.mixer.getRoot();
+                obj.name = 'Character';
+                obj.traverse( function(child) {
+                    if(child.isMesh) {
+                        child.castShadow = true;
+                        child.receiveShadow = true;
+                    }
+                });
 
-            // const testBuilding3 = objects[2];
-            // testBuilding3.position.z = -5000;
-            // testBuilding3.position.x = 3000;
-            // testBuilding3.position.y = -300;
-            // game.scene.add(testBuilding3);
+                game.scene.add(obj);
+                game.player.walk = obj.animations[0];
 
-            // const simpleBuilding1 = objects[3];
-            // simpleBuilding1.position.z = -5000;
-            // simpleBuilding1.position.x = -3000;
-            // simpleBuilding1.position.y = -300;
-            // game.scene.add(simpleBuilding1);
+                game.loadNextAnim();
+            })
 
             game.animate();
 
@@ -253,6 +253,15 @@ class Game{
                             break;
                         }
             });
+        }
+
+        set action(name) {
+            const anim = game.player.walk;
+            console.log(anim);
+            // update mixer time in animate();
+            const action = game.player.mixer.clipAction(anim, game.player.root);
+            action.time = 0;
+            action.play();
         }
 
         moveCamera(delta) {
