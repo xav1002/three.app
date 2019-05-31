@@ -81,6 +81,7 @@ class Game{
                 }
             }));
 
+            this.clock = new THREE.Clock();
             this.prevTime = performance.now();
             this.velocity = new THREE.Vector3();
             this.direction = new THREE.Vector3();
@@ -180,7 +181,9 @@ class Game{
                 });
 
                 game.scene.add(obj);
-                game.player.walk = obj.animations[0];
+                game.player.object = obj;
+                game.player.Walking = obj.animations[0];
+                game.action = 'Walking';
 
                 game.loadNextAnim();
             })
@@ -256,9 +259,9 @@ class Game{
         }
 
         set action(name) {
-            const anim = game.player.walk;
-            console.log(anim);
-            // update mixer time in animate();
+            game = this;
+            const anim = game.player[name];
+            console.log(name);
             const action = game.player.mixer.clipAction(anim, game.player.root);
             action.time = 0;
             action.play();
@@ -437,19 +440,21 @@ class Game{
                 isIntersecting = false;
             }
 
-            if(isIntersecting) {
-                // console.log(intersects[0].object);
-            }
+            // if(isIntersecting) {
+            //     intersects[0].object.material.color = 'red';
+            // }
         }
 
         animate() {
             const game = this;
+            requestAnimationFrame( function(){ game.animate(); } );
 
             var time = performance.now();
             var delta = ( time - game.prevTime ) / 1000;
+            var animationDelta = game.clock.getDelta();
 
-            requestAnimationFrame( function(){ game.animate(); } );
-    
+            if(game.player.mixer) {game.player.mixer.update(animationDelta)};
+
             // this.cube.rotation.x += 0.01;
             // this.cube.rotation.y += 0.01;
 
