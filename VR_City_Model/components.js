@@ -43,3 +43,9 @@ AFRAME.registerComponent('cabin', {
         });
     }
 })
+
+AFRAME.registerComponent('dancing', {
+    init: function() {
+        this.el.setAttribute('gltf-model', '#dancing');
+    }
+})

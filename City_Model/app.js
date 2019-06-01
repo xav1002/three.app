@@ -66,6 +66,7 @@ class Game{
             const objects = [];
             this.physicalObj = [];
             this.loader = new THREE.FBXLoader();
+            this.gltfLoader = new THREE.GLTFLoader();
 
             this.scene.children.forEach(child => game.physicalObj.push(child));
 
@@ -144,6 +145,8 @@ class Game{
             });
 
             this.player = {};
+            this.player2 = {};
+            this.playerLoaded = false;
 
         }
 
@@ -180,12 +183,41 @@ class Game{
                     }
                 });
 
+                game.player.root.position.x = -50;
                 game.scene.add(obj);
                 game.player.object = obj;
                 game.player.Walking = obj.animations[0];
                 game.action = 'Walking';
+                game.playerLoaded = true;
 
                 game.loadNextAnim();
+            });
+
+            game.gltfLoader.load('./assets/sambaDancing.gltf', function(obj) {
+                // obj.mixer = new THREE.AnimationMixer( obj );
+                // game.player2.mixer = obj.mixer;
+                // game.player2.root = obj.mixer.getRoot();
+                // obj.name = 'Character2';
+                // obj.scene.traverse( function(child) {
+                //     if(child.isMesh) {
+                //         child.castShadow = true;
+                //         child.receiveShadow = true;
+                //     }
+                // });
+
+                // console.log(obj.scene.children[0].children);
+                // game.scene.add(obj.scene.children[0].children);
+                console.log(obj);
+                obj.scene.children[0].children.traverse(child => {
+                    if(child.isMesh) {
+                        // console.log(child);
+                        game.scene.add(child);
+                        // console.log('works');
+                    }
+                });
+                // game.player2.object = obj;
+                // game.player2.Dancing = obj.animations[0];
+                // game.action2 = 'Dancing';
             })
 
             game.animate();
@@ -263,6 +295,14 @@ class Game{
             const anim = game.player[name];
             console.log(name);
             const action = game.player.mixer.clipAction(anim, game.player.root);
+            action.time = 0;
+            action.play();
+        }
+
+        set action2(name) {
+            game = this;
+            const anim = game.player2[name];
+            const action = game.player2.mixer.clipAction(anim, game.player2.root);
             action.time = 0;
             action.play();
         }
@@ -453,7 +493,12 @@ class Game{
             var delta = ( time - game.prevTime ) / 1000;
             var animationDelta = game.clock.getDelta();
 
+            // if(game.playerLoaded) {
+            //     game.player.root.position.z += 5;
+            // }
+
             if(game.player.mixer) {game.player.mixer.update(animationDelta)};
+            if(game.player2.mixer) {game.player2.mixer.update(animationDelta)};
 
             // this.cube.rotation.x += 0.01;
             // this.cube.rotation.y += 0.01;
