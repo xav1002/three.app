@@ -193,32 +193,26 @@ class Game{
                 game.loadNextAnim();
             });
 
-            game.gltfLoader.load('./assets/sambaDancing.gltf', function(obj) {
-                // obj.mixer = new THREE.AnimationMixer( obj );
-                // game.player2.mixer = obj.mixer;
-                // game.player2.root = obj.mixer.getRoot();
-                // obj.name = 'Character2';
-                // obj.scene.traverse( function(child) {
-                //     if(child.isMesh) {
-                //         child.castShadow = true;
-                //         child.receiveShadow = true;
-                //     }
-                // });
+            // game.gltfLoader.load('./assets/sambaDancing.gltf', function(obj) {
+            //     obj.mixer = new THREE.AnimationMixer( obj );
+            //     game.player2.mixer = obj.mixer;
+            //     // game.player2.root = obj.mixer.getRoot();
+            //     obj.name = 'Character2';
+            //     obj.scene.traverse( function(child) {
+            //         if(child.isMesh) {
+            //             child.castShadow = true;
+            //             child.receiveShadow = true;
+            //         }
+            //     });
 
-                // console.log(obj.scene.children[0].children);
-                // game.scene.add(obj.scene.children[0].children);
-                console.log(obj);
-                obj.scene.children[0].children.traverse(child => {
-                    if(child.isMesh) {
-                        // console.log(child);
-                        game.scene.add(child);
-                        // console.log('works');
-                    }
-                });
-                // game.player2.object = obj;
-                // game.player2.Dancing = obj.animations[0];
-                // game.action2 = 'Dancing';
-            })
+            //     game.player2.object = obj;
+            //     game.player2.Dancing = obj.animations[0];
+            //     game.action2 = 'Dancing';
+
+            //     console.log(obj.scene);
+            //     obj.scene.position.y = 100;
+            //     game.scene.add(obj.scene);
+            // });
 
             game.animate();
 

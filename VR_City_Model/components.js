@@ -49,3 +49,4 @@ AFRAME.registerComponent('dancing', {
         this.el.setAttribute('gltf-model', '#dancing');
     }
 })
+
