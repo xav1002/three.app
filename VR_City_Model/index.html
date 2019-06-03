@@ -6,7 +6,7 @@
             <title>VR City Model</title>
             <meta name="viewport" content="width=device-width, initial-scale=1">
             <link rel="stylesheet" type="text/css" media="screen" href="main.css">
-            <script src="../aframe/aframe.min.js"></script>
+            <script src="../aframe/aframe.js"></script>
     </head>
     <body>
         <!-- <script src="..\three.js-master\build\three.js"></script> -->
@@ -26,7 +26,8 @@
                 <a-asset-item id="woodencabinmtl" src="assets/Wooden_Cabin.mtl"></a-asset-item>
                 <a-asset-item id="dancing" src="assets/sambaDancing.gltf"></a-asset-item>
             </a-assets>
-            <a-camera id="camera" wasd-controls="fly: true; acceleration: 150"></a-camera>
+            <a-camera id="camera" look-controls></a-camera>
+            <a-entity position="0 0 -5" dancing animation-mixer></a-entity>
         </a-scene>
 
         <script src="app.js"></script>

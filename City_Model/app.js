@@ -108,7 +108,7 @@ class Game{
             this.interactionRaycaster = new THREE.Raycaster();
 
             this.controls = new THREE.PointerLockControls( this.camera );
-            this.controls.getObject().position.y = 100;
+            this.controls.getObject().position.y = 400;
             this.controls.getObject().position.z = 50;
             this.scene.add(this.controls.getObject());
 
@@ -152,6 +152,8 @@ class Game{
 
         init(objects) {
             const game = this;
+
+            console.log(game.camera.position, game.controls.getObject().position);
 
             document.body.removeChild(game.displayLoading);
             game.activateDiv.style.display = 'block';
@@ -352,12 +354,11 @@ class Game{
             let downTooClose = false;
             game.raycasterDown.ray.origin = position;
             game.raycasterDown.ray.direction = game.directionDown;
-            game.raycasterDown.far = limitDistance;
 
             for(let obj of game.physicalObj) {
                 const intersect = game.raycasterDown.intersectObject(obj);
                 if(intersect.length > 0) {
-                    if(intersect[0].distance < 100) {
+                    if(intersect[0].distance < 300) {
                         downTooClose = true;
                         break;
                     }
@@ -451,6 +452,12 @@ class Game{
             game.controls.getObject().translateX(game.velocity.x * delta);
             game.controls.getObject().translateY(game.velocity.y * delta);
             game.controls.getObject().translateZ(game.velocity.z * delta);
+            if(game.playerLoaded) {
+                game.player.root.position.x = game.controls.getObject().position.x + 25;
+                game.player.root.position.y = game.controls.getObject().position.y - 200;
+                game.player.root.position.z = game.controls.getObject().position.z - 50;
+                game.player.root.rotation.y = game.controls.getObject().rotation.y + (Math.PI);
+            }
 
         }
 

@@ -18,10 +18,10 @@ cube.setAttribute('position', '50 0 -10');
 console.log(cube);
 scene.appendChild(cube);
 
-var dancing = document.createElement('a-entity');
-dancing.setAttribute('dancing', true);
-dancing.setAttribute('animation-mixer', true);
-scene.appendChild(dancing);
+// var dancing = document.createElement('a-entity');
+// dancing.setAttribute('dancing', true);
+// dancing.setAttribute('animation-mixer');
+// scene.appendChild(dancing);
 
 window.addEventListener('click', function() {
     cabin.setAttribute('animation', {
