@@ -4,9 +4,12 @@ class Game{
         this.camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 10000);
         this.camera.position.z = 400;
 
+        this.textureLoader = new THREE.TextureLoader();
+        this.spaceTexture = this.textureLoader.load('assets/Hubble_Image.jpg');
+        this.scene.background = this.spaceTexture;
+
         this.renderer = new THREE.WebGLRenderer();
         this.renderer.setSize(window.innerWidth, window.innerHeight);
-        this.renderer.setClearColor('rgb(100, 100, 300)');
         document.body.appendChild(this.renderer.domElement);
 
         this.controls = new THREE.TrackballControls(this.camera, this.renderer.domElement);
@@ -22,7 +25,8 @@ class Game{
         // sun
         // const sunTexture = THREE.ImageUtils.loadTexture();
         this.sunGeometry = new THREE.SphereGeometry(50, 100, 100);
-        this.sunMaterial = new THREE.MeshPhongMaterial({color: 'red'});
+        this.sunTexture = this.textureLoader.load('assets/Sun_Image.jpg');
+        this.sunMaterial = new THREE.MeshPhongMaterial({map: this.sunTexture});
         this.sunMesh = new THREE.Mesh(this.sunGeometry, this.sunMaterial);
 
         // planets
@@ -35,11 +39,34 @@ class Game{
         this.venusMesh = new THREE.Mesh(this.venusGeometry, this.venusMaterial);
 
         // light
-        this.sunLight = new THREE.PointLight(0xffffff, 1);
+        this.sunLight = new THREE.PointLight(0xffffff, 2);
         this.sunLight.position.set(0, 0, 0);
 
         this.light = new THREE.PointLight(0xffffff, 1);
         this.light.position.set(100, 100, 100);
+
+        const game = this;
+
+        this.lightOnSun =[];
+        for(var i = 0; i < 6; i += 1) {
+            game.lightOnSun.push(new THREE.SpotLight(0xffffff));
+        }
+        this.lightOnSun[0].position.set(100, 0, 0);
+        this.lightOnSun[1].position.set(-100, 0, 0);
+        this.lightOnSun[2].position.set(0, 100, 0);
+        this.lightOnSun[3].position.set(0, -100, 0);
+        this.lightOnSun[4].position.set(0, 0, 100);
+        this.lightOnSun[5].position.set(0, 0, -100);
+
+        this.lightOnSun.forEach(light => {
+            light.intensity = 5;
+            light.angle = Math.PI / 4;
+            light.castShadow = true;
+            light.penumbra = 0;
+            game.scene.add(light);
+        });
+        // this.scene.add(this.lightOnSun[4]);
+        console.log(this.lightOnSun);
 
         // Not in Scene
         // this.ambient = new THREE.AmbientLight(0xffffff, 1);
@@ -62,8 +89,8 @@ class Game{
         console.log(game.camera, game.scene, game.sunLight, game.light, game.sunMesh, game.floorMesh);
 
         game.scene.add(game.sunMesh);
-        game.scene.add(game.sunLight);
-        game.scene.add(game.light);
+        // game.scene.add(game.sunLight);
+        // game.scene.add(game.light);
         game.scene.add(game.floorMesh);
 
         var mercuryPosX = -100;
@@ -91,14 +118,15 @@ class Game{
         // console.log(game.time);
 
         // Mercury orbit
-        game.mercuryMesh.translateX(20 * Math.sin(game.time / 10));
-        game.mercuryMesh.translateY(10 * Math.cos(game.time / 10));
-        // game.mercuryMesh.translateZ(10 * Math.sin(game.time / 10));
+        game.mercuryMesh.translateX(10 * Math.sin(game.time / 10));
+        game.mercuryMesh.translateY(1 * Math.cos(game.time / 10));
+        game.mercuryMesh.translateZ(20 * Math.cos(game.time / 10));
 
         // Venus orbit
         game.venusMesh.translateX(30 * Math.sin(game.time / 12));
         game.venusMesh.translateY(35 * Math.cos(game.time / 12));
-        game.venusMesh.translateZ(50 * Math.sin(game.time / 12));
+        game.venusMesh.translateZ(5 * Math.cos(game.time / 12));
+        // console.log(game.venusMesh.position);
 
         game.time += 1;
 
