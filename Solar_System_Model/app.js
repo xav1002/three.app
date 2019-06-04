@@ -89,7 +89,7 @@ class Game{
         console.log(game.camera, game.scene, game.sunLight, game.light, game.sunMesh, game.floorMesh);
 
         game.scene.add(game.sunMesh);
-        // game.scene.add(game.sunLight);
+        game.scene.add(game.sunLight);
         // game.scene.add(game.light);
         game.scene.add(game.floorMesh);
 
