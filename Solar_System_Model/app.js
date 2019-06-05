@@ -91,7 +91,7 @@ class Game{
         game.scene.add(game.sunMesh);
         game.scene.add(game.sunLight);
         // game.scene.add(game.light);
-        game.scene.add(game.floorMesh);
+        // game.scene.add(game.floorMesh);
 
         var mercuryPosX = -100;
         var mercuryPosY = 0;
