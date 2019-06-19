@@ -23,21 +23,21 @@ scene.appendChild(cube);
 // dancing.setAttribute('animation-mixer');
 // scene.appendChild(dancing);
 
-window.addEventListener('click', function() {
-    cabin.setAttribute('animation', {
-        property: 'rotation',
-        to: '0 360 0',
-        dur: '1500',
-        easing: 'linear',
-        loop: 'true'
-    });
-    cube.setAttribute('animation', {
-        property: 'components.material.material.color',
-        type: 'color',
-        from: 'red',
-        to: 'green',
-        dur: '5000',
-    });
-});
+// window.addEventListener('click', function() {
+//     cabin.setAttribute('animation', {
+//         property: 'rotation',
+//         to: '0 360 0',
+//         dur: '1500',
+//         easing: 'linear',
+//         loop: 'true'
+//     });
+//     cube.setAttribute('animation', {
+//         property: 'components.material.material.color',
+//         type: 'color',
+//         from: 'red',
+//         to: 'green',
+//         dur: '5000',
+//     });
+// });
 
 console.log(scene);
